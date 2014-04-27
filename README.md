@@ -8,4 +8,4 @@ Luckly, my design was pretty good, because Google released Google Keep a year or
 Skip forward a couple years and there is some time and a desire to develop Android apps again. This is really a "MyFirstAndroid" type app, so it is probably best not to expect it to do anything useful for a while.
 
 # Compatibility #
-This app is designed to work with KitKat and newer (SDK 19+). At some point it may be extended to older devices, but for now, this is just easier.
+This app is designed to work with KitKat and newer (API 19+). At some point it may be extended to older devices, but for now, this is just easier.
