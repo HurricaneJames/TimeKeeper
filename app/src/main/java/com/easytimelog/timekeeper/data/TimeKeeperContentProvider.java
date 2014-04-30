@@ -14,7 +14,9 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import java.text.SimpleDateFormat;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 import java.util.ArrayList;
 
 public class TimeKeeperContentProvider extends ContentProvider {
@@ -111,6 +113,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
             case PROJECT_LIST:
                 return getUriForId(uri, db.insert(TimeKeeperContract.Projects.TABLE_NAME, null, contentValues));
             case TIME_RECORD_LIST:
+                verifyTimeRecordColumns(contentValues);
                 return getUriForId(uri, db.insert(TimeKeeperContract.TimeRecords.TABLE_NAME, null, contentValues));
             case NOTE_LIST:
                 return getUriForId(uri, db.insert(TimeKeeperContract.Notes.TABLE_NAME, null, contentValues));
@@ -170,6 +173,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 break;
             case TIME_RECORD_ID:
             case TIME_RECORD_LIST:
+                verifyTimeRecordColumns(values);
                 updateCount = db.update(TimeKeeperContract.TimeRecords.TABLE_NAME, values, where, selectionArgs);
                 break;
             case NOTE_ID:
@@ -205,13 +209,41 @@ public class TimeKeeperContentProvider extends ContentProvider {
      * @param overwrite - true will overwrite all columns while allow overwriting with defaults (ex. updated_ad)
      */
     private void updateDefaultColumns(ContentValues contentValues, boolean overwrite) {
-        long currentTime = System.currentTimeMillis();
+        DateTime currentTime = new DateTime(DateTimeZone.UTC);
         if(!contentValues.containsKey(TimeKeeperContract.CommonColumns.CREATED_AT)) {
-            contentValues.put(TimeKeeperContract.CommonColumns.CREATED_AT, currentTime);
+            contentValues.put(TimeKeeperContract.CommonColumns.CREATED_AT, currentTime.toString());
+        } else {
+            unifyDatetimeContentValue(contentValues, TimeKeeperContract.CommonColumns.CREATED_AT);
         }
         if(overwrite || !contentValues.containsKey(TimeKeeperContract.CommonColumns.UPDATED_AT)) {
-            contentValues.put(TimeKeeperContract.CommonColumns.UPDATED_AT, currentTime);
+            contentValues.put(TimeKeeperContract.CommonColumns.UPDATED_AT, currentTime.toString());
+        } else {
+            unifyDatetimeContentValue(contentValues, TimeKeeperContract.CommonColumns.UPDATED_AT);
         }
+    }
+
+    private void verifyTimeRecordColumns(ContentValues contentValues) {
+        unifyDatetimeContentValue(contentValues, TimeKeeperContract.TimeRecords.START_AT);
+        unifyDatetimeContentValue(contentValues, TimeKeeperContract.TimeRecords.END_AT);
+    }
+
+    private void unifyDatetimeContentValue(ContentValues contentValues, String columnName) {
+        if(contentValues.containsKey(columnName)) {
+            contentValues.put(columnName, fixDate(contentValues.get(columnName)));
+        }
+    }
+
+    private String fixDate(Object timestamp) {
+        DateTime dateTime;
+        if(timestamp instanceof Long) { dateTime = new DateTime(timestamp); }
+        if(timestamp instanceof DateTime) { dateTime = (DateTime)timestamp; }
+        dateTime = DateTime.parse(timestamp.toString());
+        // assume it is a string representation and use joda default ISO 8601 parser
+        return getStringForDateTime(dateTime);
+    }
+
+    private String getStringForDateTime(DateTime datetime) {
+        return datetime.withZone(DateTimeZone.UTC).toString();
     }
 
     private boolean isBatchProcessing() {
