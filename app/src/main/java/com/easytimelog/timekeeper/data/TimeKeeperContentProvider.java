@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -234,12 +235,9 @@ public class TimeKeeperContentProvider extends ContentProvider {
     }
 
     private String fixDate(Object timestamp) {
-        DateTime dateTime;
-        if(timestamp instanceof Long) { dateTime = new DateTime(timestamp); }
-        if(timestamp instanceof DateTime) { dateTime = (DateTime)timestamp; }
-        dateTime = DateTime.parse(timestamp.toString());
-        // assume it is a string representation and use joda default ISO 8601 parser
-        return getStringForDateTime(dateTime);
+        if(timestamp instanceof Long)     { return getStringForDateTime(new DateTime(timestamp)); }
+        if(timestamp instanceof DateTime) { return getStringForDateTime((DateTime)timestamp); }
+        return getStringForDateTime(DateTime.parse(timestamp.toString()));
     }
 
     private String getStringForDateTime(DateTime datetime) {
