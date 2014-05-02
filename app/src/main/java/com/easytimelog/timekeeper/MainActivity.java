@@ -13,20 +13,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
 
+import com.easytimelog.timekeeper.devtools.DatabaseUtils;
+import com.easytimelog.timekeeper.views.TimeRecordFragment;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements TimeRecordFragment.OnTimeRecordSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // TODO - remove this dev/debug with an actual UI method of adding records to the databse
+        DatabaseUtils.tempSeedDatabase(getApplicationContext(), 10);
+
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new TimeRecordFragment())
                     .commit();
         }
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // TODO - remove this dev/debug with an actual UI method of removing records from the db
+        DatabaseUtils.wipeDatabase(getApplicationContext());
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -48,19 +62,9 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
+    @Override
+    public void onTimeRecordSelected(String id) {
+        Log.d("MainActivity", "onTimeRecordSelected [" + id + "]");
     }
+
 }
