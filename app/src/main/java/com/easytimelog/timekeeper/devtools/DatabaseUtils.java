@@ -12,10 +12,9 @@ import java.util.Date;
 import java.util.Random;
 
 public class DatabaseUtils {
+    public static int nextProjectId = 0;
     public static void wipeDatabase(Context context) {
         context.deleteDatabase("timekeeper.db");
-//        TimeKeeperSqlOpenHelper openHelper = new TimeKeeperSqlOpenHelper(context);
-//        SQLiteDatabase db = openHelper.getWritableDatabase();
     }
 
     public static void tempSeedDatabase(Context context, int count) {
@@ -30,7 +29,7 @@ public class DatabaseUtils {
 
     public static long addBlankProject(Context context) {
         ContentValues values = new ContentValues();
-        values.put(TimeKeeperContract.Projects.NAME, "Unknown Event");
+        values.put(TimeKeeperContract.Projects.NAME, "Blank Project: " + nextProjectId++);
 
         Uri newProjectUri = context.getContentResolver().insert(TimeKeeperContract.Projects.CONTENT_URI, values);
         String newId = newProjectUri.getLastPathSegment();
