@@ -23,6 +23,9 @@ public class MainActivity extends Activity implements TimeRecordFragment.OnTimeR
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // TODO - remove this dev/debug with an actual UI method of removing records from the db
+        DatabaseUtils.wipeDatabase(getApplicationContext());
+
         // TODO - remove this dev/debug with an actual UI method of adding records to the databse
         DatabaseUtils.tempSeedDatabase(getApplicationContext(), 10);
 
@@ -33,14 +36,6 @@ public class MainActivity extends Activity implements TimeRecordFragment.OnTimeR
                     .commit();
         }
     }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // TODO - remove this dev/debug with an actual UI method of removing records from the db
-        DatabaseUtils.wipeDatabase(getApplicationContext());
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
