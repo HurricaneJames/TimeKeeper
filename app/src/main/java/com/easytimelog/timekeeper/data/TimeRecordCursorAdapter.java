@@ -2,6 +2,7 @@ package com.easytimelog.timekeeper.data;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
+// TODO - move this to the views package (since it is more a view object anyway)
 public class TimeRecordCursorAdapter extends CursorAdapter {
     private static final PeriodFormatter DURATION_FORMATTER;
     static {
@@ -59,7 +61,7 @@ public class TimeRecordCursorAdapter extends CursorAdapter {
         String endAt   = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.TimeRecords.END_AT));
         Period duration = new Period(new DateTime(startAt), new DateTime(endAt));
 
-        description.setText(startAt);
+        description.setText(cursor.getString(cursor.getColumnIndex(TimeKeeperContract.TimeRecords.PROJECT_NAME)));
         timer.setText(DURATION_FORMATTER.print(duration));
     }
 }

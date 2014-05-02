@@ -28,10 +28,23 @@ public final class TimeKeeperContract {
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + _mimeType;
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + _mimeType;
 
-        public static final String START_AT   = "start_at";
-        public static final String END_AT     = "end_at";
-        public static final String PROJECT_ID = "project_id";
-        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, START_AT, END_AT, PROJECT_ID, CREATED_AT, UPDATED_AT };
+        public static final String START_AT     = "start_at";
+        public static final String END_AT       = "end_at";
+        public static final String PROJECT_ID   = "project_id";
+        public static final String PROJECT_NAME = "project_name";
+        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, START_AT, END_AT, PROJECT_ID, CREATED_AT, UPDATED_AT};
+
+        public static final String[] PROJECTION_ALL_WITH_PROJECTS = {
+                TABLE_NAME + '.' + _ID,
+                TABLE_NAME + '.' + GLOBAL_ID,
+                TABLE_NAME + '.' + START_AT,
+                TABLE_NAME + '.' + END_AT,
+                TABLE_NAME + '.' + PROJECT_ID,
+                TABLE_NAME + '.' + CREATED_AT,
+                TABLE_NAME + '.' + UPDATED_AT,
+                Projects.TABLE_NAME + '.' + Projects.NAME + " AS " + PROJECT_NAME};
+        public static final String TIME_RECORDS_WITH_PROJECTS = TABLE_NAME + " LEFT OUTER JOIN " + Projects.TABLE_NAME + " ON(time_records." + PROJECT_ID + " = projects." + CommonColumns._ID + ")";
+
         public static final String DEFAULT_SORT_ORDER = START_AT + " ASC";
     }
     public static final class Notes implements CommonColumns {

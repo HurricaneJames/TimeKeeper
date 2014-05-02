@@ -82,11 +82,11 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 builder.appendWhere(TimeKeeperContract.Projects._ID + " = " + uri.getLastPathSegment());
                 break;
             case TIME_RECORD_LIST:
-                builder.setTables(TimeKeeperContract.TimeRecords.TABLE_NAME);
+                builder.setTables(TimeKeeperContract.TimeRecords.TIME_RECORDS_WITH_PROJECTS);
                 if(TextUtils.isEmpty(sortOrder)) { sortOrder = TimeKeeperContract.TimeRecords.DEFAULT_SORT_ORDER; }
                 break;
             case TIME_RECORD_ID:
-                builder.setTables(TimeKeeperContract.TimeRecords.TABLE_NAME);
+                builder.setTables(TimeKeeperContract.TimeRecords.TIME_RECORDS_WITH_PROJECTS);
                 builder.appendWhere(TimeKeeperContract.TimeRecords._ID + " = " + uri.getLastPathSegment());
                 break;
             case NOTE_LIST:

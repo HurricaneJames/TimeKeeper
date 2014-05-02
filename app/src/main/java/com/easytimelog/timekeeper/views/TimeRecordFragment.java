@@ -92,7 +92,7 @@ public class TimeRecordFragment extends Fragment implements AbsListView.OnItemCl
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL, null, null, null);
+        return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL_WITH_PROJECTS, null, null, null);
     }
 
     @Override
