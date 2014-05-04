@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+    <RelativeLayout
+        android:id="@+id/project_item_project_info_layout"
+        android:layout_width="match_parent"
+        android:layout_height="120dp">
+        <Button
+            android:id="@+id/project_item_timer"
+            android:text="0s"
+            android:layout_width="120dp"
+            android:layout_height="120dp" />
+
+        <TextView
+            android:id="@+id/project_item_name"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_toRightOf="@id/project_item_timer" />
+
+        <ImageView
+            android:id="@+id/project_item_text_note_count_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_action_keyboard"
+            android:layout_below="@id/project_item_name"
+            android:layout_toRightOf="@id/project_item_timer" />
+
+        <ImageView
+            android:id="@+id/project_item_text_list_count_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_action_view_as_list"
+            android:layout_below="@id/project_item_name"
+            android:layout_toRightOf="@id/project_item_text_note_count_icon" />
+
+        <ImageView
+            android:id="@+id/project_item_text_camera_count_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_action_camera"
+            android:layout_below="@id/project_item_name"
+            android:layout_toRightOf="@id/project_item_text_list_count_icon" />
+
+        <ImageView
+            android:id="@+id/project_item_text_audio_count_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_action_mic"
+            android:layout_below="@id/project_item_name"
+            android:layout_toRightOf="@id/project_item_text_camera_count_icon" />
+
+        <TextView
+            android:id="@+id/project_item_note_count"
+            android:text="0"
+            android:gravity="center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@id/project_item_text_note_count_icon"
+            android:layout_toRightOf="@id/project_item_timer" />
+
+        <TextView
+            android:id="@+id/project_item_list_count"
+            android:text="0"
+            android:gravity="center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@id/project_item_text_list_count_icon"
+            android:layout_toRightOf="@id/project_item_note_count" />
+
+        <TextView
+            android:id="@+id/project_item_camera_count"
+            android:text="0"
+            android:gravity="center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@id/project_item_text_camera_count_icon"
+            android:layout_toRightOf="@id/project_item_list_count" />
+
+        <TextView
+            android:id="@+id/project_item_audio_count"
+            android:text="0"
+            android:gravity="center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@id/project_item_text_audio_count_icon"
+            android:layout_toRightOf="@id/project_item_camera_count" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_below="@id/project_item_project_info_layout"
+        android:weightSum="1.0" >
+
+        <ImageButton
+            android:id="@+id/project_item_new_text_note_button"
+            android:src="@drawable/ic_action_keyboard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:onClick="buttonAddTextNoteClick" />
+
+        <ImageButton
+            android:id="@+id/project_item_new_list_note_button"
+            android:src="@drawable/ic_action_view_as_list"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:onClick="buttonAddListNoteClick" />
+
+        <ImageButton
+            android:id="@+id/project_item_new_camera_note_button"
+            android:src="@drawable/ic_action_camera"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:onClick="buttonAddCameraNoteClick" />
+
+        <ImageButton
+            android:id="@+id/project_item_new_audio_note_button"
+            android:src="@drawable/ic_action_mic"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:onClick="buttonAddAudioNoteClick" />
+    </LinearLayout>
+</RelativeLayout>

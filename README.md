@@ -9,3 +9,9 @@ Skip forward a couple years and there is some time and a desire to develop Andro
 
 # Compatibility #
 This app is designed to work with KitKat and newer (API 19+). At some point it may be extended to older devices, but for now, this is just easier.
+
+# Icons #
+Added some icons from the Google's current (2014-05-04) Android Action Bar Icon Pack.
+https://developer.android.com/design/downloads/index.html
+https://developer.android.com/design/style/iconography.html
+https://developer.android.com/downloads/design/Android_Design_Icons_20131106.zip
