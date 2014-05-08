@@ -17,7 +17,10 @@ public final class TimeKeeperContract {
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + _mimeType;
 
         public static final String NAME = "name";
-        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, NAME, CREATED_AT, UPDATED_AT };
+        public static final String DURATION = "duration";
+        public static final String RUNNING = "currently_running";
+        public static final String STARTED_AT = "cached_start_at";
+        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, NAME, DURATION, RUNNING, STARTED_AT, CREATED_AT, UPDATED_AT };
         public static final String DEFAULT_SORT_ORDER = UPDATED_AT + " ASC";
     }
     public static final class TimeRecords implements CommonColumns {

@@ -3,6 +3,7 @@ package com.easytimelog.timekeeper.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class TimeKeeperSqlOpenHelper extends SQLiteOpenHelper {
     private static final String NAME = "timekeeper.db";
@@ -18,11 +19,15 @@ public class TimeKeeperSqlOpenHelper extends SQLiteOpenHelper {
         new Migration() {
             public String[] up() {
                 return new String[]{
-                    "create table projects (" +     COMMON_COLUMNS + "name text not null);",
-                    "create table time_records (" + COMMON_COLUMNS + "project_id integer not null, start_at datetime not null, end_at datetime not null);",
+                    "create table projects (" +     COMMON_COLUMNS + "name text not null, duration integer default 0, currently_running boolean default false, cached_start_at datetime);",
+                    "create table time_records (" + COMMON_COLUMNS + "project_id integer not null, start_at datetime not null, end_at datetime, duration datetime);",
                     "create table notes (" +        COMMON_COLUMNS + "time_record_id integer not null, content_type text not null, content text);",
                     "create index index_notes_on_time_record_id on notes (time_record_id);",
-                    "create index index_time_records_on_project_id on time_records (project_id);"
+                    "create index index_time_records_on_project_id_and_start_at on time_records (project_id, start_at);",
+                    "create index index_time_records_on_start_at on time_records (start_at);",
+                    "create index index_projects_on_updated_at on projects (updated_at);",
+//                    "create index index_time_records_on_updated_at on time_records (updated_at);",
+//                    "create index index_notes_on_updated_at on notes (updated_at);"
                 };
             }
             public String[] down() {
@@ -32,7 +37,7 @@ public class TimeKeeperSqlOpenHelper extends SQLiteOpenHelper {
                     "drop table projects;"
                 };
             }
-        }
+        },
     };
 
     public TimeKeeperSqlOpenHelper(Context context) {

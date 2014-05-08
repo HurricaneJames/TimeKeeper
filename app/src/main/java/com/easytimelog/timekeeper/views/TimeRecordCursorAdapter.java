@@ -1,8 +1,7 @@
-package com.easytimelog.timekeeper.data;
+package com.easytimelog.timekeeper.views;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,38 +9,12 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 
 import com.easytimelog.timekeeper.R;
+import com.easytimelog.timekeeper.data.TimeKeeperContract;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 
-// TODO - move this to the views package (since it is more a view object anyway)
 public class TimeRecordCursorAdapter extends CursorAdapter {
-    private static final PeriodFormatter DURATION_FORMATTER;
-    static {
-        DURATION_FORMATTER = new PeriodFormatterBuilder()
-                .printZeroRarelyLast()
-                .appendYears()
-                .appendSuffix(" year", " years")
-                .appendSeparator(" and ")
-                .appendMonths()
-                .appendSuffix(" month", " months")
-                .appendSeparator(", ")
-                .appendDays()
-                .appendSuffix(" day", " days")
-                .appendSeparator(", ")
-                .appendHours()
-                .appendSuffix(" hour", " hours")
-                .appendSeparator(", ")
-                .appendMinutes()
-                .appendSuffix(" minute", " minutes")
-                .appendSeparator(", ")
-                .appendSeconds()
-                .appendSuffix(" second", " seconds")
-                .toFormatter();
-    }
-
     private LayoutInflater mInflater;
     public TimeRecordCursorAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
@@ -62,6 +35,6 @@ public class TimeRecordCursorAdapter extends CursorAdapter {
         Period duration = new Period(new DateTime(startAt), new DateTime(endAt));
 
         description.setText(cursor.getString(cursor.getColumnIndex(TimeKeeperContract.TimeRecords.PROJECT_NAME)));
-        timer.setText(DURATION_FORMATTER.print(duration));
+        timer.setText(DateFormatter.DEFAULT.print(duration));
     }
 }
