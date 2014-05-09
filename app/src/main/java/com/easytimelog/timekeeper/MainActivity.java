@@ -32,7 +32,7 @@ public class MainActivity extends Activity implements TimeRecordFragment.OnTimeR
         DatabaseUtils.wipeDatabase(getApplicationContext());
 
         // TODO - remove this dev/debug with an actual UI method of adding records to the databse
-        DatabaseUtils.tempSeedDatabase(getApplicationContext(), 10);
+        DatabaseUtils.tempSeedDatabase(getApplicationContext(), 5, 25);
 
 //        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, 1), TimeKeeperContract.Projects.PROJECTION_ALL, null, null, null);
 //        if(cursor.moveToFirst()) {

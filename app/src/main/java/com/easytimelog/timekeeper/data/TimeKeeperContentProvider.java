@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -324,7 +325,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
         timeRecordsCursor.close();
         ContentValues values = new ContentValues();
         values.put(TimeKeeperContract.Projects.DURATION, totalDuration.getMillis());
-        getContext().getContentResolver().update(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, 1), values, null, null);
+        getContext().getContentResolver().update(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, projectId), values, null, null);
     }
 
     private static final String[] TIME_RECORD_PROJECT_ID = { TimeKeeperContract.TimeRecords.PROJECT_ID };

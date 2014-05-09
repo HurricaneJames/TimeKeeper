@@ -15,6 +15,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
@@ -24,9 +25,8 @@ public class DatabaseUtils {
         context.deleteDatabase("timekeeper.db");
     }
 
-    public static void tempSeedDatabase(Context context, int count) {
+    public static void tempSeedDatabase(Context context, int projectCount, int timeRecordCount) {
         Random random = new Random();
-        long projectId = addBlankProject(context);
         // should be 9 hours total
 //        DateTime[] fixedDates = {
 //                new DateTime(2014, 05, 05,  6, 0), new DateTime(2014, 05, 05,  7, 0),
@@ -40,9 +40,14 @@ public class DatabaseUtils {
 //        }
 
 
-        for(int i=0; i<count; i++) {
+        ArrayList<Integer> projectIds = new ArrayList<Integer>(projectCount);
+        for(int i=0; i<projectCount; i++) {
+            projectIds.add(addBlankProject(context));
+        }
+        for(int i=0; i<timeRecordCount; i++) {
             Date start = new Date(System.currentTimeMillis() - 1000 * 3600 * random.nextInt(24) - 1000 * 60 * random.nextInt(60) - 1000 * random.nextInt(60));
             Date end   = new Date(start.getTime() + 1000 * 3600 * random.nextInt(2) + 1000* 60 * random.nextInt(60) + 1000* random.nextInt(60));
+            long projectId = projectIds.get(random.nextInt(projectIds.size()));
             addTimeRecord(context, start, end, projectId);
         }
 
@@ -50,13 +55,13 @@ public class DatabaseUtils {
 //        updateProjectCache(context, 1);
     }
 
-    public static long addBlankProject(Context context) {
+    public static Integer addBlankProject(Context context) {
         ContentValues values = new ContentValues();
         values.put(TimeKeeperContract.Projects.NAME, "Blank Project: " + nextProjectId++);
 
         Uri newProjectUri = context.getContentResolver().insert(TimeKeeperContract.Projects.CONTENT_URI, values);
         String newId = newProjectUri.getLastPathSegment();
-        return Long.parseLong(newId);
+        return new Integer(newId);
     }
 
     public static void addTimeRecord(Context context, Date start, Date end, long projectId) {
