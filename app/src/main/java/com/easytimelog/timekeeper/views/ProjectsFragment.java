@@ -2,10 +2,14 @@ package com.easytimelog.timekeeper.views;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
@@ -19,6 +23,8 @@ import android.widget.ListAdapter;
 
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
+
+import org.joda.time.DateTime;
 
 public class ProjectsFragment extends Fragment implements AbsListView.OnItemClickListener,
                                                           LoaderManager.LoaderCallbacks<Cursor> {
@@ -45,6 +51,13 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         mListView.setOnItemClickListener(this);
         mAdapter = new ProjectCursorAdapter(this.context, null, 0);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+
+        view.findViewById(R.id.projects_list_new_project).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AddNewProjectWithRunningTimerTask(context, System.currentTimeMillis()).execute();
+            }
+        });
 
         getLoaderManager().initLoader(0, null, this);
 
@@ -116,4 +129,31 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         this.mAdapter.swapCursor(null);
     }
 
+    public class AddNewProjectWithRunningTimerTask extends AsyncTask<Void, Void, Void> {
+        private Context mApplicationContext;
+        private long mStartTime;
+        private DateTime mStartAt;
+
+        public AddNewProjectWithRunningTimerTask(Context context, long startTime) {
+            mApplicationContext = context.getApplicationContext();
+            mStartTime = startTime;
+            mStartAt = new DateTime(startTime);
+        }
+        @Override
+        protected Void doInBackground(Void... params) {
+            ContentResolver contentResolver = mApplicationContext.getContentResolver();
+
+            ContentValues projectValues = new ContentValues();
+            projectValues.put(TimeKeeperContract.Projects.NAME, "Started: " + DateFormatter.getHumanFriendlyDate(mStartAt));
+            Uri newProjectUri = contentResolver.insert(TimeKeeperContract.Projects.CONTENT_URI, projectValues);
+            int projectId = Integer.parseInt(newProjectUri.getLastPathSegment());
+
+            ContentValues timeRecordValues = new ContentValues();
+            timeRecordValues.put(TimeKeeperContract.TimeRecords.PROJECT_ID, projectId);
+            timeRecordValues.put(TimeKeeperContract.TimeRecords.START_AT, mStartTime);
+            contentResolver.insert(TimeKeeperContract.TimeRecords.CONTENT_URI, timeRecordValues);
+
+            return null;
+        }
+    }
 }

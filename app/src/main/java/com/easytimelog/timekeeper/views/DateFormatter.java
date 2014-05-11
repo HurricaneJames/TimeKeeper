@@ -1,5 +1,6 @@
 package com.easytimelog.timekeeper.views;
 
+import org.joda.time.DateTime;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -29,5 +30,9 @@ public class DateFormatter {
                 .appendSeconds()
                 .appendSuffix(" second", " seconds")
                 .toFormatter();
+    }
+
+    public static final String getHumanFriendlyDate(DateTime dateTime) {
+        return dateTime.toString();
     }
 }
