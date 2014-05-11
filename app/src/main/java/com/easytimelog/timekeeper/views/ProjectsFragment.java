@@ -8,6 +8,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
     private OnProjectSelectedListener mListener;
     private AbsListView mListView;
     private CursorAdapter mAdapter;
+    private Handler timerButtonUpdateHandler;
 
     public ProjectsFragment() {
     }
@@ -57,6 +59,29 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnProjectSelectedListener");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        timerButtonUpdateHandler = new Handler();
+        timerButtonUpdateHandler.postDelayed(new Runnable() {
+            public void run() {
+                int viewCount = mListView.getChildCount();
+                for(int i=0; i<viewCount; i++) {
+                    TimerButton timerButton = (TimerButton)mListView.getChildAt(i).findViewById(R.id.project_item_timer);
+                    timerButton.updateTime();
+                }
+                timerButtonUpdateHandler.postDelayed(this, 1000);
+            }
+        }, 1000);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        timerButtonUpdateHandler.removeCallbacksAndMessages(null);
+        timerButtonUpdateHandler = null;
     }
 
     @Override

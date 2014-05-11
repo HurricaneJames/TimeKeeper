@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -263,20 +264,10 @@ public class TimeKeeperContentProvider extends ContentProvider {
         unifyDatetimeContentValue(contentValues, TimeKeeperContract.TimeRecords.END_AT);
     }
 
-    private void unifyDatetimeContentValue(ContentValues contentValues, String columnName) {
+    private static void unifyDatetimeContentValue(ContentValues contentValues, String columnName) {
         if(contentValues.containsKey(columnName)) {
-            contentValues.put(columnName, fixDate(contentValues.get(columnName)));
+            contentValues.put(columnName, TimeKeeperContract.getStandardDateString(contentValues.get(columnName)));
         }
-    }
-
-    private String fixDate(Object timestamp) {
-        if(timestamp instanceof Long)     { return getStringForDateTime(new DateTime(timestamp)); }
-        if(timestamp instanceof DateTime) { return getStringForDateTime((DateTime)timestamp); }
-        return getStringForDateTime(DateTime.parse(timestamp.toString()));
-    }
-
-    private String getStringForDateTime(DateTime datetime) {
-        return datetime.withZone(DateTimeZone.UTC).toString();
     }
 
     private boolean isBatchProcessing() {
@@ -299,18 +290,40 @@ public class TimeKeeperContentProvider extends ContentProvider {
         }
     }
     private void updateProjectCache(int projectId) {
+        boolean running = false;
+        int runningTimeRecordId = -1;
+        DateTime projectStartAt = null;
         Cursor timeRecordsCursor = getContext().getContentResolver().query(TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL, TimeKeeperContract.TimeRecords.PROJECT_ID + " = " + projectId, null, TimeKeeperContract.TimeRecords.START_AT + " ASC");
         if(!timeRecordsCursor.moveToFirst()) { return; }
 
+        int idColumnIndex = timeRecordsCursor.getColumnIndex(TimeKeeperContract.TimeRecords._ID);
         int startAtColumnIndex = timeRecordsCursor.getColumnIndex(TimeKeeperContract.TimeRecords.START_AT);
         int endAtColumnIndex = timeRecordsCursor.getColumnIndex(TimeKeeperContract.TimeRecords.END_AT);
         DateTime startAt = new DateTime(timeRecordsCursor.getString(startAtColumnIndex));
-        DateTime endAt   = new DateTime(timeRecordsCursor.getString(endAtColumnIndex));
+        String endAtValue = timeRecordsCursor.getString(endAtColumnIndex);
+        DateTime endAt;
+        if(endAtValue == null) {
+            running = true;
+            projectStartAt = startAt;
+            endAt = startAt;
+            runningTimeRecordId = timeRecordsCursor.getInt(idColumnIndex);
+        }else {
+            endAt = new DateTime(endAtValue);
+        }
+
         Duration totalDuration = new Duration(startAt, endAt);
         DateTime maxEnd = endAt;
         while(timeRecordsCursor.moveToNext()) {
             startAt = new DateTime(timeRecordsCursor.getString(startAtColumnIndex));
-            endAt   = new DateTime(timeRecordsCursor.getString(endAtColumnIndex));
+            endAtValue = timeRecordsCursor.getString(endAtColumnIndex);
+            if(endAtValue == null) {
+                running = true;
+                projectStartAt = startAt;
+                endAt = startAt;
+                runningTimeRecordId = timeRecordsCursor.getInt(idColumnIndex);
+            }else {
+                endAt = new DateTime(endAtValue);
+            }
             Duration duration = new Duration(startAt, endAt);
             Duration deltaEnds = new Duration(maxEnd, endAt);
             if(deltaEnds.compareTo(Duration.ZERO) >= 0) {
@@ -325,13 +338,22 @@ public class TimeKeeperContentProvider extends ContentProvider {
         timeRecordsCursor.close();
         ContentValues values = new ContentValues();
         values.put(TimeKeeperContract.Projects.DURATION, totalDuration.getMillis());
+        if(running) {
+            values.put(TimeKeeperContract.Projects.RUNNING, true);
+            values.put(TimeKeeperContract.Projects.RUNNING_TIME_RECORD, runningTimeRecordId);
+            values.put(TimeKeeperContract.Projects.STARTED_AT, TimeKeeperContract.getStandardDateString(projectStartAt));
+        }else {
+            values.put(TimeKeeperContract.Projects.RUNNING, false);
+            values.putNull(TimeKeeperContract.Projects.RUNNING_TIME_RECORD);
+            values.putNull(TimeKeeperContract.Projects.STARTED_AT);
+        }
         getContext().getContentResolver().update(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, projectId), values, null, null);
     }
 
     private static final String[] TIME_RECORD_PROJECT_ID = { TimeKeeperContract.TimeRecords.PROJECT_ID };
     private Set<Integer> getProjectIdsForTimeRecords(Uri contentUri, String selection, String[] selectionArgs, Set<Integer> projectIds) {
         Cursor cursor = getContext().getContentResolver().query(contentUri, TIME_RECORD_PROJECT_ID, selection, selectionArgs, null);
-        if(cursor.moveToFirst()) { return projectIds; }
+        if(!cursor.moveToFirst()) { return projectIds; }
         int columnIndex = cursor.getColumnIndex(TimeKeeperContract.TimeRecords.PROJECT_ID);
         do {
             projectIds.add(cursor.getInt(columnIndex));

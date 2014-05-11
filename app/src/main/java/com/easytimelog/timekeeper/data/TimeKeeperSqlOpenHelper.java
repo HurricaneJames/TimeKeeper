@@ -19,7 +19,7 @@ public class TimeKeeperSqlOpenHelper extends SQLiteOpenHelper {
         new Migration() {
             public String[] up() {
                 return new String[]{
-                    "create table projects (" +     COMMON_COLUMNS + "name text not null, duration integer default 0, currently_running boolean default false, cached_start_at datetime);",
+                    "create table projects (" +     COMMON_COLUMNS + "name text not null, duration integer default 0, currently_running integer default 0, running_time_record_id integer, cached_start_at datetime);",
                     "create table time_records (" + COMMON_COLUMNS + "project_id integer not null, start_at datetime not null, end_at datetime, duration datetime);",
                     "create table notes (" +        COMMON_COLUMNS + "time_record_id integer not null, content_type text not null, content text);",
                     "create index index_notes_on_time_record_id on notes (time_record_id);",

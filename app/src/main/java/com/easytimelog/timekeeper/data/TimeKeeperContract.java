@@ -4,6 +4,9 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 public final class TimeKeeperContract {
     public static final String AUTHORITY = "com.easytimelog.timekeeper.contract";
     public static final Uri CONTENT_URI  = Uri.parse("content://" + AUTHORITY);
@@ -19,9 +22,10 @@ public final class TimeKeeperContract {
         public static final String NAME = "name";
         public static final String DURATION = "duration";
         public static final String RUNNING = "currently_running";
+        public static final String RUNNING_TIME_RECORD = "running_time_record_id";
         public static final String STARTED_AT = "cached_start_at";
-        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, NAME, DURATION, RUNNING, STARTED_AT, CREATED_AT, UPDATED_AT };
-        public static final String DEFAULT_SORT_ORDER = UPDATED_AT + " ASC";
+        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, NAME, DURATION, RUNNING, RUNNING_TIME_RECORD, STARTED_AT, CREATED_AT, UPDATED_AT };
+        public static final String DEFAULT_SORT_ORDER = UPDATED_AT + " DESC";
     }
     public static final class TimeRecords implements CommonColumns {
         public static final String TABLE_NAME = "time_records";
@@ -71,4 +75,13 @@ public final class TimeKeeperContract {
         public static final String UPDATED_AT = "updated_at";
     }
 
+    public static String getStandardDateString(Object timestamp) {
+        if(timestamp instanceof Long)     { return getStringForDateTime(new DateTime(timestamp)); }
+        if(timestamp instanceof DateTime) { return getStringForDateTime((DateTime)timestamp); }
+        return getStringForDateTime(DateTime.parse(timestamp.toString()));
+    }
+
+    public static String getStringForDateTime(DateTime datetime) {
+        return datetime.withZone(DateTimeZone.UTC).toString();
+    }
 }
