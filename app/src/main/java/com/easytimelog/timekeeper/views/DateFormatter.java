@@ -5,9 +5,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-/**
- * Created by James Burnett on 5/4/2014.
- */
 public class DateFormatter {
     public static final PeriodFormatter DEFAULT;
     static {

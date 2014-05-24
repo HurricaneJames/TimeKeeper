@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,7 @@ import org.joda.time.DateTime;
 public class ProjectsFragment extends Fragment implements AbsListView.OnItemClickListener,
                                                           LoaderManager.LoaderCallbacks<Cursor> {
 
-    public interface OnProjectSelectedListener { public void onProjectSelected(String id); }
+    public interface OnProjectSelectedListener { public void onProjectSelected(int projectId); }
     private Context context;
     private OnProjectSelectedListener mListener;
     private AbsListView mListView;
@@ -44,8 +45,10 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_projects, container, false);
-        this.context = container.getContext();
+//        boolean dualPane = getActivity().findViewById(R.id.time_records_container) != null;
+        View view = inflater.inflate(R.layout.fragment_projects_list, container, false);
+//        View view = inflater.inflate(R.layout.fragment_projects, container, false);
+        this.context = getActivity().getApplicationContext();
         mListView = (AbsListView) view.findViewById(android.R.id.list);
 
         mListView.setOnItemClickListener(this);
@@ -106,7 +109,10 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null != mListener) { mListener.onProjectSelected(""); }
+        Log.d("ProjectsFragment", "Item Click");
+        Cursor positionCursor = (Cursor)mAdapter.getItem(position);
+        int projectId = positionCursor.getInt(positionCursor.getColumnIndex(TimeKeeperContract.Projects._ID));
+        if (null != mListener) { mListener.onProjectSelected(projectId); }
     }
 
 

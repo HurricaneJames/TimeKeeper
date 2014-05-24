@@ -18,11 +18,20 @@
         </activity>
 
         <provider
-            android:name=".data.TimeKeeperContentProvider"
+            android:name="com.easytimelog.timekeeper.data.TimeKeeperContentProvider"
             android:authorities="com.easytimelog.timekeeper.contract"
             android:exported="false"
-            android:label="TimeKeeperContentProvider">
+            android:label="TimeKeeperContentProvider" >
         </provider>
+
+        <activity
+            android:name="com.easytimelog.timekeeper.views.ProjectDetailActivity"
+            android:label="@string/title_activity_project_detail"
+            android:parentActivityName="com.easytimelog.timekeeper.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.easytimelog.timekeeper.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp">
+    android:paddingRight="10dp"
+    android:descendantFocusability="blocksDescendants" >
     <RelativeLayout
         android:id="@+id/project_item_project_info_layout"
         android:layout_width="match_parent"

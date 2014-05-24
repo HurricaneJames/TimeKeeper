@@ -2,12 +2,15 @@ package com.easytimelog.timekeeper.views;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,28 +22,28 @@ import android.widget.ListAdapter;
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
 
-public class TimeRecordFragment extends Fragment implements AbsListView.OnItemClickListener,
-                                                            LoaderManager.LoaderCallbacks<Cursor> {
+public class ProjectDetailsFragment extends Fragment implements AbsListView.OnItemClickListener,
+                                                                LoaderManager.LoaderCallbacks<Cursor> {
+
+    public interface OnTimeRecordSelectedListener { public void onTimeRecordSelected(String id); }
+    private static final String ARG_PROJECT_ID = "projectId";
+    private int mProjectId;
+    public int getShownProjectId() { return mProjectId; }
 
     private Context context;
     private OnTimeRecordSelectedListener mListener;
     private AbsListView mListView;
     private CursorAdapter mAdapter;
 
-    private static final String ARG_PROJECT_ID = "projectId";
-    private int mProjectId;
-    public int getShownProjectId() { return mProjectId; }
 
-
-    public static TimeRecordFragment newInstance(int projectId) {
-        TimeRecordFragment fragment = new TimeRecordFragment();
+    public static ProjectDetailsFragment newInstance(int projectId) {
+        ProjectDetailsFragment fragment = new ProjectDetailsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_PROJECT_ID, projectId);
         fragment.setArguments(args);
         return fragment;
     }
-
-    public TimeRecordFragment() {
+    public ProjectDetailsFragment() {
     }
 
     @Override
@@ -53,7 +56,7 @@ public class TimeRecordFragment extends Fragment implements AbsListView.OnItemCl
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_timerecords_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_project_details, container, false);
         this.context = getActivity().getApplicationContext();
         mListView = (AbsListView) view.findViewById(android.R.id.list);
 
@@ -62,6 +65,7 @@ public class TimeRecordFragment extends Fragment implements AbsListView.OnItemCl
         mListView.setOnItemClickListener(this);
 
         getLoaderManager().initLoader(0, null, this);
+
 
         return view;
     }
@@ -93,7 +97,7 @@ public class TimeRecordFragment extends Fragment implements AbsListView.OnItemCl
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL_WITH_PROJECTS, null, null, null);
+        return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL_WITH_PROJECTS, TimeKeeperContract.TimeRecords.TABLE_NAME + "." + TimeKeeperContract.TimeRecords.PROJECT_ID + "=" + mProjectId, null, null);
     }
 
     @Override
@@ -106,17 +110,4 @@ public class TimeRecordFragment extends Fragment implements AbsListView.OnItemCl
         this.mAdapter.swapCursor(null);
     }
 
-    /**
-    * This interface must be implemented by activities that contain this
-    * fragment to allow an interaction in this fragment to be communicated
-    * to the activity and potentially other fragments contained in that
-    * activity.
-    * <p>
-    * See the Android Training lesson <a href=
-    * "http://developer.android.com/training/basics/fragments/communicating.html"
-    * >Communicating with Other Fragments</a> for more information.
-    */
-    public interface OnTimeRecordSelectedListener {
-        public void onTimeRecordSelected(String id);
-    }
- }
+}
