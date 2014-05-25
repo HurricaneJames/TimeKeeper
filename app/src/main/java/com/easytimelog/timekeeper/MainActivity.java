@@ -22,8 +22,6 @@ import com.easytimelog.timekeeper.devtools.DatabaseUtils;
 import com.easytimelog.timekeeper.views.ProjectDetailActivity;
 import com.easytimelog.timekeeper.views.ProjectDetailsFragment;
 import com.easytimelog.timekeeper.views.ProjectsFragment;
-import com.easytimelog.timekeeper.views.TimeRecordFragment;
-
 
 public class MainActivity extends Activity implements ProjectDetailsFragment.OnTimeRecordSelectedListener,
                                                       ProjectsFragment.OnProjectSelectedListener {
@@ -38,7 +36,7 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         DatabaseUtils.wipeDatabase(getApplicationContext());
 
         // TODO - remove this dev/debug with an actual UI method of adding records to the databse
-        DatabaseUtils.tempSeedDatabase(getApplicationContext(), 5, 25);
+        DatabaseUtils.tempSeedDatabase(getApplicationContext(), 5, 25, 3);
 
 //        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, 1), TimeKeeperContract.Projects.PROJECTION_ALL, null, null, null);
 //        if(cursor.moveToFirst()) {

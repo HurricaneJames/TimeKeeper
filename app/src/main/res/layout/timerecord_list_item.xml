@@ -2,21 +2,32 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:layout_width="fill_parent"
-android:layout_height="150dip"
+android:layout_height="75dip"
 android:orientation="horizontal"
 android:background="@color/gray">
 
-<Button
-    android:layout_weight="0"
-    android:layout_width="150dip"
-    android:layout_height="fill_parent"
-    android:text="0s"
-    android:id="@+id/timeRecordListItemViewTimeButton" />
+    <TextView
+        android:layout_weight="0"
+        android:layout_width="125dp"
+        android:layout_height="match_parent"
+        android:text="0s"
+        android:gravity="center"
+        android:id="@+id/timeRecordListItemViewTime" />
 
-<Button
-    android:layout_weight="1"
-    android:layout_width="match_parent"
-    android:layout_height="fill_parent"
-    android:text="Project Name"
-    android:id="@+id/timeRecordListItemViewDescriptionButton" />
+    <TextView
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:text="Project Name"
+        android:id="@+id/timeRecordListItemViewDescription" />
+
+    <TextView
+        android:id="@+id/timeRecordListItemViewNoteCount"
+        android:gravity="center"
+        android:text="0"
+        android:layout_weight="0"
+        android:layout_width="45dp"
+        android:layout_height="match_parent" />
+
 </LinearLayout>

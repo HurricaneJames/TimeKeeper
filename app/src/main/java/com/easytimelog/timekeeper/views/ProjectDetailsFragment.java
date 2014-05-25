@@ -17,13 +17,15 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
+import android.widget.CursorTreeAdapter;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListAdapter;
 
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
 
-public class ProjectDetailsFragment extends Fragment implements AbsListView.OnItemClickListener,
-                                                                LoaderManager.LoaderCallbacks<Cursor> {
+public class ProjectDetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public interface OnTimeRecordSelectedListener { public void onTimeRecordSelected(String id); }
     private static final String ARG_PROJECT_ID = "projectId";
@@ -32,8 +34,8 @@ public class ProjectDetailsFragment extends Fragment implements AbsListView.OnIt
 
     private Context context;
     private OnTimeRecordSelectedListener mListener;
-    private AbsListView mListView;
-    private CursorAdapter mAdapter;
+    private ExpandableListView mListView;
+    private CursorTreeAdapter mAdapter;
 
 
     public static ProjectDetailsFragment newInstance(int projectId) {
@@ -58,11 +60,14 @@ public class ProjectDetailsFragment extends Fragment implements AbsListView.OnIt
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_project_details, container, false);
         this.context = getActivity().getApplicationContext();
-        mListView = (AbsListView) view.findViewById(android.R.id.list);
+        mListView = (ExpandableListView) view.findViewById(android.R.id.list);
+        mListView.setGroupIndicator(null);
 
-        mAdapter = new TimeRecordCursorAdapter(context, null, 0);
-        ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
-        mListView.setOnItemClickListener(this);
+        mAdapter = new TimeRecordCursorAdapter(null, context, false);
+        ((ExpandableListView)mListView).setAdapter(mAdapter);
+
+        // todo - replace the onitemclick with on group expand/collapse onchildclick listeners
+//        mListView.setOnItemClickListener(this);
 
         getLoaderManager().initLoader(0, null, this);
 
@@ -86,28 +91,19 @@ public class ProjectDetailsFragment extends Fragment implements AbsListView.OnIt
         mListener = null;
     }
 
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null != mListener) {
-            // TODO - select and return the ID of the time record
-            mListener.onTimeRecordSelected("");
-        }
-    }
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL_WITH_PROJECTS, TimeKeeperContract.TimeRecords.TABLE_NAME + "." + TimeKeeperContract.TimeRecords.PROJECT_ID + "=" + mProjectId, null, null);
+        return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL, TimeKeeperContract.TimeRecords.whereProjectId(mProjectId), null, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        this.mAdapter.swapCursor(data);
+        this.mAdapter.setGroupCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        this.mAdapter.swapCursor(null);
+        this.mAdapter.setGroupCursor(null);
     }
 
 }

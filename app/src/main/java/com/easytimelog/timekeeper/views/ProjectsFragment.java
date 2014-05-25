@@ -150,7 +150,7 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
             ContentResolver contentResolver = mApplicationContext.getContentResolver();
 
             ContentValues projectValues = new ContentValues();
-            projectValues.put(TimeKeeperContract.Projects.NAME, "Started: " + DateFormatter.getHumanFriendlyDate(mStartAt));
+            projectValues.put(TimeKeeperContract.Projects.NAME, getString(R.string.started) + " "  + DateFormatter.getHumanFriendlyDate(mStartAt));
             Uri newProjectUri = contentResolver.insert(TimeKeeperContract.Projects.CONTENT_URI, projectValues);
             int projectId = Integer.parseInt(newProjectUri.getLastPathSegment());
 

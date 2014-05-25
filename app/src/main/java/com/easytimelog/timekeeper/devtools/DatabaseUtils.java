@@ -20,12 +20,23 @@ import java.util.Date;
 import java.util.Random;
 
 public class DatabaseUtils {
+    public static String generateSQLPlaceHolders(int count) {
+        if(count < 1) { throw new IllegalArgumentException("Cannot generate placeholders for no arguments!"); }
+        StringBuilder stringBuilder = new StringBuilder(count*2 - 1);
+        stringBuilder.append("?");
+        for(int i=1; i<count; i++) {
+            stringBuilder.append(",?");
+        }
+        return stringBuilder.toString();
+    }
+
+
     public static int nextProjectId = 0;
     public static void wipeDatabase(Context context) {
         context.deleteDatabase("timekeeper.db");
     }
 
-    public static void tempSeedDatabase(Context context, int projectCount, int timeRecordCount) {
+    public static void tempSeedDatabase(Context context, int projectCount, int timeRecordCount, int notesCount) {
         Random random = new Random();
         // should be 9 hours total
 //        DateTime[] fixedDates = {
@@ -48,7 +59,12 @@ public class DatabaseUtils {
             Date start = new Date(System.currentTimeMillis() - 1000 * 3600 * random.nextInt(24) - 1000 * 60 * random.nextInt(60) - 1000 * random.nextInt(60));
             Date end   = new Date(start.getTime() + 1000 * 3600 * random.nextInt(2) + 1000* 60 * random.nextInt(60) + 1000* random.nextInt(60));
             long projectId = projectIds.get(random.nextInt(projectIds.size()));
-            addTimeRecord(context, start, end, projectId);
+            int timeRecordId = addTimeRecord(context, start, end, projectId);
+
+            int notesForThisRecord = random.nextInt(notesCount);
+            for(int j=0; j<notesForThisRecord; j++) {
+                addNote(context, "text", "Scribble: " + random.nextInt(1000), null, timeRecordId);
+            }
         }
 
 //      should not need to use this anymore
@@ -64,12 +80,23 @@ public class DatabaseUtils {
         return new Integer(newId);
     }
 
-    public static void addTimeRecord(Context context, Date start, Date end, long projectId) {
+    public static int addTimeRecord(Context context, Date start, Date end, long projectId) {
         ContentValues values = new ContentValues();
         values.put(TimeKeeperContract.TimeRecords.START_AT, start.getTime());
         if(end != null) { values.put(TimeKeeperContract.TimeRecords.END_AT, end.getTime()); }
         values.put(TimeKeeperContract.TimeRecords.PROJECT_ID, projectId);
-        context.getContentResolver().insert(TimeKeeperContract.TimeRecords.CONTENT_URI, values);
+        Uri insertUri = context.getContentResolver().insert(TimeKeeperContract.TimeRecords.CONTENT_URI, values);
+        return Integer.parseInt(insertUri.getLastPathSegment());
+    }
+
+    public static int addNote(Context context, String noteType, String scribble, String link, int timeRecordId) {
+        ContentValues values = new ContentValues();
+        values.put(TimeKeeperContract.Notes.NOTE_TYPE, noteType);
+        values.put(TimeKeeperContract.Notes.LINK, link);
+        values.put(TimeKeeperContract.Notes.SCRIBBLE, scribble);
+        values.put(TimeKeeperContract.Notes.TIME_RECORD_ID, timeRecordId);
+        Uri insertUri = context.getContentResolver().insert(TimeKeeperContract.Notes.CONTENT_URI, values);
+        return Integer.parseInt(insertUri.getLastPathSegment());
     }
 
 //    public static void updateProjectCache(Context context, int projectId) {

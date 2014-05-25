@@ -39,8 +39,11 @@ public final class TimeKeeperContract {
         public static final String END_AT       = "end_at";
         public static final String PROJECT_ID   = "project_id";
         public static final String PROJECT_NAME = "project_name";
-        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, START_AT, END_AT, PROJECT_ID, CREATED_AT, UPDATED_AT};
+        public static final String NOTE_COUNT   = "note_count";
+        public static final String NOTE_COUNT_SELECTION = "(select count(*) from " + Notes.TABLE_NAME + " where " + Notes.TABLE_NAME + '.' + Notes.TIME_RECORD_ID + " = " + TABLE_NAME + '.' + _ID + ") as " + NOTE_COUNT;
+        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, START_AT, END_AT, PROJECT_ID, CREATED_AT, UPDATED_AT, NOTE_COUNT_SELECTION };
 
+        // todo - refactor this out (do not want the join for project name anymore)
         public static final String[] PROJECTION_ALL_WITH_PROJECTS = {
                 TABLE_NAME + '.' + _ID,
                 TABLE_NAME + '.' + GLOBAL_ID,
@@ -53,6 +56,10 @@ public final class TimeKeeperContract {
         public static final String TIME_RECORDS_WITH_PROJECTS = TABLE_NAME + " LEFT OUTER JOIN " + Projects.TABLE_NAME + " ON(time_records." + PROJECT_ID + " = projects." + CommonColumns._ID + ")";
 
         public static final String DEFAULT_SORT_ORDER = START_AT + " ASC";
+
+        public static final String whereProjectId(int projectId) {
+            return TABLE_NAME + "." + PROJECT_ID + "=" + projectId;
+        }
     }
     public static final class Notes implements CommonColumns {
         public static final String TABLE_NAME = "notes";
@@ -63,10 +70,15 @@ public final class TimeKeeperContract {
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + _mimeType;
 
         public static final String SCRIBBLE       = "scribble";
+        public static final String NOTE_TYPE      = "content_type";
         public static final String LINK           = "link";
         public static final String TIME_RECORD_ID = "time_record_id";
-        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, SCRIBBLE, LINK, TIME_RECORD_ID, CREATED_AT, UPDATED_AT };
+        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, SCRIBBLE, NOTE_TYPE, LINK, TIME_RECORD_ID, CREATED_AT, UPDATED_AT };
         public static final String DEFAULT_SORT_ORDER = _ID + " DESC";
+
+        public static final String whereTimeRecordId(int timeRecordId) {
+            return TABLE_NAME + '.' + TIME_RECORD_ID + "=" + timeRecordId;
+        }
     }
 
     public static interface CommonColumns extends BaseColumns {

@@ -15,6 +15,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.easytimelog.timekeeper.devtools.DatabaseUtils;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -136,7 +138,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
             case TIME_RECORD_LIST:
                 verifyTimeRecordColumns(contentValues);
                 retUri = getUriForId(uri, db.insert(TimeKeeperContract.TimeRecords.TABLE_NAME, null, contentValues));
-                updateProjectCache((contentValues.getAsInteger(TimeKeeperContract.TimeRecords.PROJECT_ID)));
+                updateProjectCache(contentValues.getAsString(TimeKeeperContract.TimeRecords.PROJECT_ID));
                 return retUri;
             case NOTE_LIST:
                 return getUriForId(uri, db.insert(TimeKeeperContract.Notes.TABLE_NAME, null, contentValues));
@@ -172,7 +174,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 break;
             case TIME_RECORD_ID:
             case TIME_RECORD_LIST:
-                Set<Integer> projectIds = getProjectIdsForTimeRecords(uri, selection, selectionArgs);
+                Set<String> projectIds = getProjectIdsForTimeRecords(uri, selection, selectionArgs);
                 deletedCount = db.delete(TimeKeeperContract.TimeRecords.TABLE_NAME, where, selectionArgs);
                 if(deletedCount > 0) {
                     updateProjectCache(projectIds);
@@ -205,7 +207,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
             case TIME_RECORD_ID:
             case TIME_RECORD_LIST:
                 verifyTimeRecordColumns(values);
-                Set<Integer> projectIds = getProjectIdsForTimeRecords(uri, selection, selectionArgs);
+                Set<String> projectIds = getProjectIdsForTimeRecords(uri, selection, selectionArgs);
                 updateCount = db.update(TimeKeeperContract.TimeRecords.TABLE_NAME, values, where, selectionArgs);
                 if(updateCount > 0) {
                     // check for any updates (in case the change was moving to a different project)
@@ -284,12 +286,12 @@ public class TimeKeeperContentProvider extends ContentProvider {
         return where;
     }
 
-    private void updateProjectCache(Set<Integer> projectIds) {
-        for(int projectId:projectIds) {
+    private void updateProjectCache(Set<String> projectIds) {
+        for(String projectId:projectIds) {
             updateProjectCache(projectId);
         }
     }
-    private void updateProjectCache(int projectId) {
+    private void updateProjectCache(String projectId) {
         boolean running = false;
         int runningTimeRecordId = -1;
         DateTime projectStartAt = null;
@@ -347,22 +349,30 @@ public class TimeKeeperContentProvider extends ContentProvider {
             values.putNull(TimeKeeperContract.Projects.RUNNING_TIME_RECORD);
             values.putNull(TimeKeeperContract.Projects.STARTED_AT);
         }
-        getContext().getContentResolver().update(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, projectId), values, null, null);
+        getContext().getContentResolver().update(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, Long.parseLong(projectId)), values, null, null);
     }
 
     private static final String[] TIME_RECORD_PROJECT_ID = { TimeKeeperContract.TimeRecords.PROJECT_ID };
-    private Set<Integer> getProjectIdsForTimeRecords(Uri contentUri, String selection, String[] selectionArgs, Set<Integer> projectIds) {
+    private Set<String> getProjectIdsForTimeRecords(Uri contentUri, String selection, String[] selectionArgs, Set<String> projectIds) {
         Cursor cursor = getContext().getContentResolver().query(contentUri, TIME_RECORD_PROJECT_ID, selection, selectionArgs, null);
-        if(!cursor.moveToFirst()) { return projectIds; }
-        int columnIndex = cursor.getColumnIndex(TimeKeeperContract.TimeRecords.PROJECT_ID);
-        do {
-            projectIds.add(cursor.getInt(columnIndex));
-        }while(cursor.moveToNext());
+        getIdsFromCursor(cursor,cursor.getColumnIndex(TimeKeeperContract.TimeRecords.PROJECT_ID), projectIds);
         cursor.close();
         return projectIds;
     }
-    private Set<Integer> getProjectIdsForTimeRecords(Uri contentUri, String selection, String[] selectionArgs) {
-        HashSet<Integer> projectIds = new HashSet<Integer>();
+    private Set<String> getProjectIdsForTimeRecords(Uri contentUri, String selection, String[] selectionArgs) {
+        HashSet<String> projectIds = new HashSet<String>();
         return getProjectIdsForTimeRecords(contentUri, selection, selectionArgs, projectIds);
+    }
+
+    private Set<String> getIdsFromCursor(Cursor cursor, int idColumn, Set<String> intoSet) {
+        if(!cursor.moveToFirst()) { return intoSet; }
+        do {
+            intoSet.add(cursor.getString(idColumn));
+        }while(cursor.moveToNext());
+        return intoSet;
+    }
+    private Set<String> getIdsFromCursor(Cursor cursor, int idColumn) {
+        HashSet<String> ids = new HashSet<String>();
+        return getIdsFromCursor(cursor, idColumn, ids);
     }
 }
