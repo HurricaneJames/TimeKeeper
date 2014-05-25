@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- todo - pull these colors out into a theme file -->
+    <gradient
+        android:startColor="#667AB3"
+        android:endColor="#7C95D9"
+        android:angle="90">
+    </gradient>
+</shape>

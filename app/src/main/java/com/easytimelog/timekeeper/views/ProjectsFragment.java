@@ -21,9 +21,11 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
+import com.easytimelog.timekeeper.ui.TimerButton;
 
 import org.joda.time.DateTime;
 
@@ -31,29 +33,39 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
                                                           LoaderManager.LoaderCallbacks<Cursor> {
 
     public interface OnProjectSelectedListener { public void onProjectSelected(int projectId); }
+
+    private static final String SELECTED_PROJECT = "selectedProject";
+    private static final int INVALID_SELECTED_INDEX = -1;
+
     private Context context;
     private OnProjectSelectedListener mListener;
     private AbsListView mListView;
     private CursorAdapter mAdapter;
     private Handler timerButtonUpdateHandler;
 
+    private int mCurrentPosition = INVALID_SELECTED_INDEX;
+
     public ProjectsFragment() {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState != null) {
+            mCurrentPosition = savedInstanceState.getInt(SELECTED_PROJECT, INVALID_SELECTED_INDEX);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        boolean dualPane = getActivity().findViewById(R.id.time_records_container) != null;
         View view = inflater.inflate(R.layout.fragment_projects_list, container, false);
-//        View view = inflater.inflate(R.layout.fragment_projects, container, false);
         this.context = getActivity().getApplicationContext();
         mListView = (AbsListView) view.findViewById(android.R.id.list);
 
         mListView.setOnItemClickListener(this);
         mAdapter = new ProjectCursorAdapter(this.context, null, 0);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+        mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         view.findViewById(R.id.projects_list_new_project).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,10 +118,18 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         mListener = null;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SELECTED_PROJECT, mCurrentPosition);
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Log.d("ProjectsFragment", "Item Click");
+        mCurrentPosition = position;
+        mListView.setItemChecked(mCurrentPosition, true);
+
         Cursor positionCursor = (Cursor)mAdapter.getItem(position);
         int projectId = positionCursor.getInt(positionCursor.getColumnIndex(TimeKeeperContract.Projects._ID));
         if (null != mListener) { mListener.onProjectSelected(projectId); }
@@ -127,7 +147,10 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.mAdapter.swapCursor(data);
-
+        Log.d("onLoadFinished", "mCurrentPosition: " + mCurrentPosition);
+        if(mCurrentPosition != INVALID_SELECTED_INDEX) {
+            mListView.setItemChecked(mCurrentPosition, true);
+        }
     }
 
     @Override

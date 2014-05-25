@@ -5,16 +5,18 @@
     android:layout_height="match_parent"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
-    android:descendantFocusability="blocksDescendants" >
+    android:background="@drawable/project_selector">
     <RelativeLayout
         android:id="@+id/project_item_project_info_layout"
         android:layout_width="match_parent"
         android:layout_height="120dp">
-        <com.easytimelog.timekeeper.views.TimerButton
+        <com.easytimelog.timekeeper.ui.TimerButton
             android:id="@+id/project_item_timer"
             android:text="0s"
             android:layout_width="120dp"
-            android:layout_height="120dp" />
+            android:layout_height="120dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
 
         <TextView
             android:id="@+id/project_item_name"
@@ -96,7 +98,8 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_below="@id/project_item_project_info_layout"
-        android:weightSum="1.0" >
+        android:weightSum="1.0"
+        android:descendantFocusability="blocksDescendants" >
 
         <ImageButton
             android:id="@+id/project_item_new_text_note_button"
