@@ -6,4 +6,12 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
+
+    <item android:id="@+id/action_seedDB"
+        android:title="Seed DB"
+        android:orderInCategory="50" />
+
+    <item android:id="@+id/action_wipeDB"
+        android:title="Wipe DB (requires restart)"
+    android:orderInCategory="75" />
 </menu>

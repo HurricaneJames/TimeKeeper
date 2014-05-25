@@ -36,6 +36,24 @@ public class DatabaseUtils {
         context.deleteDatabase("timekeeper.db");
     }
 
+//    public static void dumpProjects() {
+//        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, 1), TimeKeeperContract.Projects.PROJECTION_ALL, null, null, null);
+//        if(cursor.moveToFirst()) {
+//            String startedAt;
+//            long duration;
+//            boolean running;
+//            {
+//                duration = cursor.getLong(cursor.getColumnIndex(TimeKeeperContract.Projects.DURATION));
+//                startedAt = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.STARTED_AT));
+//                running = cursor.getInt(cursor.getColumnIndex(TimeKeeperContract.Projects.RUNNING)) != 0;
+//
+//                Log.d("##### ##### ##### DURATION", Long.toString(duration));
+//                Log.d("##### ##### ##### startedAt", "-" + startedAt);
+//                Log.d("##### ##### ##### running", Boolean.toString(running));
+//            }while(cursor.moveToNext());
+//        }
+//    }
+
     public static void tempSeedDatabase(Context context, int projectCount, int timeRecordCount, int notesCount) {
         Random random = new Random();
         // should be 9 hours total

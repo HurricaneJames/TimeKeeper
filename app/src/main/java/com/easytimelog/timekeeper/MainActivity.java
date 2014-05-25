@@ -32,28 +32,6 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO - remove this dev/debug with an actual UI method of removing records from the db
-        DatabaseUtils.wipeDatabase(getApplicationContext());
-
-        // TODO - remove this dev/debug with an actual UI method of adding records to the databse
-        DatabaseUtils.tempSeedDatabase(getApplicationContext(), 5, 25, 3);
-
-//        Cursor cursor = getContentResolver().query(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, 1), TimeKeeperContract.Projects.PROJECTION_ALL, null, null, null);
-//        if(cursor.moveToFirst()) {
-//            String startedAt;
-//            long duration;
-//            boolean running;
-//            {
-//                duration = cursor.getLong(cursor.getColumnIndex(TimeKeeperContract.Projects.DURATION));
-//                startedAt = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.STARTED_AT));
-//                running = cursor.getInt(cursor.getColumnIndex(TimeKeeperContract.Projects.RUNNING)) != 0;
-//
-//                Log.d("##### ##### ##### DURATION", Long.toString(duration));
-//                Log.d("##### ##### ##### startedAt", "-" + startedAt);
-//                Log.d("##### ##### ##### running", Boolean.toString(running));
-//            }while(cursor.moveToNext());
-//        }
-
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
 
@@ -82,6 +60,18 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         if (id == R.id.action_settings) {
             return true;
         }
+
+        if(id == R.id.action_seedDB) {
+            // TODO - remove this dev/debug with an actual UI method of adding records to the databse
+            DatabaseUtils.tempSeedDatabase(getApplicationContext(), 5, 25, 3);
+        }
+
+        if(id == R.id.action_wipeDB) {
+            // TODO - remove this dev/debug with an actual UI method of removing records from the db
+            DatabaseUtils.wipeDatabase(getApplicationContext());
+            System.exit(0);
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -93,11 +83,8 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     @Override
     public void onProjectSelected(int id) {
         Log.d("MainActivity", "onProjectSelected [" + id + "]");
-//        Log.d("MainActivity", "Dual Pane Display: " + mDualPane);
         if(mDualPane) {
             ProjectDetailsFragment recordsFragment = (ProjectDetailsFragment ) getFragmentManager().findFragmentById(R.id.time_records_container);
-//Log.d("MainActivity", "Project Details Fragment Shown Id: " + recordsFragment.getShownProjectId());
-//Log.d("MainActivity", "Update to: " + id);
             if(recordsFragment == null || recordsFragment.getShownProjectId() != id) {
                 recordsFragment = ProjectDetailsFragment.newInstance(id);
             }
