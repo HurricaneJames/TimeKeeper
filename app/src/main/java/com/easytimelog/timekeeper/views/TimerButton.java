@@ -1,4 +1,4 @@
-package com.easytimelog.timekeeper.ui;
+package com.easytimelog.timekeeper.views;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -6,8 +6,6 @@ import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
-
-import com.easytimelog.timekeeper.views.DateFormatter;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;

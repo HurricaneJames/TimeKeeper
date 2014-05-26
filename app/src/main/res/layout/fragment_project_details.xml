@@ -1,13 +1,22 @@
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.easytimelog.timekeeper.views.ProjectDetailsFragment">
 
+    <EditText
+        android:id="@+id/projectName"
+        android:text="Project Name"
+        android:inputType="textCapWords"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+
     <ExpandableListView
         android:id="@android:id/list"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/projectName" />
 
-</FrameLayout>
+</RelativeLayout>

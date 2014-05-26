@@ -25,7 +25,6 @@ import android.widget.ListView;
 
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
-import com.easytimelog.timekeeper.ui.TimerButton;
 
 import org.joda.time.DateTime;
 
@@ -147,7 +146,6 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         this.mAdapter.swapCursor(data);
-        Log.d("onLoadFinished", "mCurrentPosition: " + mCurrentPosition);
         if(mCurrentPosition != INVALID_SELECTED_INDEX) {
             mListView.setItemChecked(mCurrentPosition, true);
         }

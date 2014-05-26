@@ -9,12 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
-import com.easytimelog.timekeeper.ui.TimerButton;
 
 public class ProjectCursorAdapter extends CursorAdapter {
     private LayoutInflater mInflater;

@@ -10,7 +10,7 @@
         android:id="@+id/project_item_project_info_layout"
         android:layout_width="match_parent"
         android:layout_height="120dp">
-        <com.easytimelog.timekeeper.ui.TimerButton
+        <com.easytimelog.timekeeper.views.TimerButton
             android:id="@+id/project_item_timer"
             android:text="0s"
             android:layout_width="120dp"

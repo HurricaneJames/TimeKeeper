@@ -3,6 +3,7 @@ package com.easytimelog.timekeeper.views;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -10,6 +11,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,12 +22,14 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.CursorTreeAdapter;
+import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListAdapter;
 
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
+import com.easytimelog.timekeeper.util.TaskQueue;
 
 public class ProjectDetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -32,9 +38,14 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
     private int mProjectId;
     public int getShownProjectId() { return mProjectId; }
 
+    private static final int TIME_RECORDS_LOADER = 0;
+    private static final int PROJECT_LOADER = 1;
+    private boolean mIgnoreProjectUpdates = false;
+
     private Context context;
     private OnTimeRecordSelectedListener mListener;
     private ExpandableListView mListView;
+    private EditText mProjectNameField;
     private CursorTreeAdapter mAdapter;
 
 
@@ -63,15 +74,16 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
         mListView = (ExpandableListView) view.findViewById(android.R.id.list);
         mListView.setGroupIndicator(null);
 
+        mProjectNameField = (EditText)view.findViewById(R.id.projectName);
+        ProjectNameTextChangeListener textChangeListener = new ProjectNameTextChangeListener();
+        mProjectNameField.addTextChangedListener(textChangeListener);
+        mProjectNameField.setOnFocusChangeListener(textChangeListener);
+
         mAdapter = new TimeRecordCursorAdapter(null, context, false);
         ((ExpandableListView)mListView).setAdapter(mAdapter);
 
-        // todo - replace the onitemclick with on group expand/collapse onchildclick listeners
-//        mListView.setOnItemClickListener(this);
-
-        getLoaderManager().initLoader(0, null, this);
-
-
+        getLoaderManager().initLoader(TIME_RECORDS_LOADER, null, this);
+        getLoaderManager().initLoader(PROJECT_LOADER, null, this);
         return view;
     }
 
@@ -93,17 +105,82 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL, TimeKeeperContract.TimeRecords.whereProjectId(mProjectId), null, null);
+        switch(id) {
+            case TIME_RECORDS_LOADER:
+                return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL, TimeKeeperContract.TimeRecords.whereProjectId(mProjectId), null, null);
+            case PROJECT_LOADER:
+                return new CursorLoader(getActivity().getApplicationContext(),
+                        ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, mProjectId),
+                        new String[] { TimeKeeperContract.Projects.NAME },
+                        null, null, null);
+        }
+        return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        this.mAdapter.setGroupCursor(data);
+        switch(loader.getId()) {
+            case TIME_RECORDS_LOADER:
+                this.mAdapter.setGroupCursor(data);
+                break;
+            case PROJECT_LOADER:
+                if(!mIgnoreProjectUpdates) {
+                    data.moveToFirst();
+                    mIgnoreProjectUpdates = true;
+                    mProjectNameField.setText(data.getString(data.getColumnIndex(TimeKeeperContract.Projects.NAME)));
+                }
+                break;
+        }
+
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        this.mAdapter.setGroupCursor(null);
+       switch(loader.getId()) {
+           case TIME_RECORDS_LOADER:
+               this.mAdapter.setGroupCursor(null);
+               break;
+           case PROJECT_LOADER:
+               mProjectNameField.setText("");
+               break;
+       }
     }
 
+    private class ProjectNameTextChangeListener implements TextWatcher, View.OnFocusChangeListener {
+        private TaskQueue taskQueue = new TaskQueue();
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if(taskQueue.isRunning()) {
+                final String newName = s.toString();
+                Runnable dbUpdateTask = new Runnable() {
+                    @Override
+                    public void run() {
+                        ContentValues values = new ContentValues();
+                        values.put(TimeKeeperContract.Projects.NAME, newName);
+                        context.getApplicationContext().getContentResolver().update(
+                                ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, mProjectId),
+                                values, null, null);
+                    }
+                };
+                taskQueue.addTask(dbUpdateTask);
+            }
+        }
+
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if(hasFocus) {
+                mIgnoreProjectUpdates = true;
+                taskQueue.addAfterProcessQueueTask(new Runnable() { public void run() { mIgnoreProjectUpdates = false; } });
+                taskQueue.start();
+            }else {
+                taskQueue.stop();
+            }
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) { }
+    }
 }
