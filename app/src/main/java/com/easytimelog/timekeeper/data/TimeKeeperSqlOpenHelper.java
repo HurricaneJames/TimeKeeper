@@ -17,10 +17,12 @@ public class TimeKeeperSqlOpenHelper extends SQLiteOpenHelper {
     }
     private static final Migration[] MIGRATIONS = {
         new Migration() {
+            private static final String TIME_CACHE_COLUMNS = "duration integer default 0, currently_running integer default 0, running_time_record_id integer, cached_start_at datetime";
+            private static final String NOTE_CACHE_COLUMNS = "text_note_count integer default 0, list_note_count integer default 0, camera_note_count integer default 0, audio_note_count integer default 0";
             public String[] up() {
                 return new String[]{
-                    "create table projects (" +     COMMON_COLUMNS + "name text not null, duration integer default 0, currently_running integer default 0, running_time_record_id integer, cached_start_at datetime);",
-                    "create table time_records (" + COMMON_COLUMNS + "project_id integer not null, start_at datetime not null, end_at datetime, duration datetime);",
+                    "create table projects (" +     COMMON_COLUMNS + "name text not null, " + TIME_CACHE_COLUMNS + ", " + NOTE_CACHE_COLUMNS + ");",
+                    "create table time_records (" + COMMON_COLUMNS + "project_id integer not null, start_at datetime not null, end_at datetime, duration integer);",
                     "create table notes (" +        COMMON_COLUMNS + "time_record_id integer not null, content_type text not null, link text, scribble text);",
                     "create index index_notes_on_time_record_id on notes (time_record_id);",
                     "create index index_time_records_on_project_id_and_start_at on time_records (project_id, start_at);",

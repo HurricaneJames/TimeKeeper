@@ -54,6 +54,7 @@ public class DatabaseUtils {
 //        }
 //    }
 
+    public static final String[] POSSIBLE_NOTE_TYPES = {"text", "list"};
     public static void tempSeedDatabase(Context context, int projectCount, int timeRecordCount, int notesCount) {
         Random random = new Random();
         // should be 9 hours total
@@ -81,7 +82,8 @@ public class DatabaseUtils {
 
             int notesForThisRecord = random.nextInt(notesCount);
             for(int j=0; j<notesForThisRecord; j++) {
-                addNote(context, "text", "Scribble: " + random.nextInt(1000), null, timeRecordId);
+                String noteType = POSSIBLE_NOTE_TYPES[random.nextInt(POSSIBLE_NOTE_TYPES.length)];
+                addNote(context, noteType, "Scribble: " + random.nextInt(1000), null, timeRecordId);
             }
         }
 

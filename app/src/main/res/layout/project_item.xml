@@ -25,7 +25,7 @@
             android:layout_toRightOf="@id/project_item_timer" />
 
         <ImageView
-            android:id="@+id/project_item_text_note_count_icon"
+            android:id="@+id/project_item_text_count_icon"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_action_keyboard"
@@ -38,7 +38,7 @@
             android:layout_height="32dp"
             android:src="@drawable/ic_action_view_as_list"
             android:layout_below="@id/project_item_name"
-            android:layout_toRightOf="@id/project_item_text_note_count_icon" />
+            android:layout_toRightOf="@id/project_item_text_count_icon" />
 
         <ImageView
             android:id="@+id/project_item_text_camera_count_icon"
@@ -57,12 +57,12 @@
             android:layout_toRightOf="@id/project_item_text_camera_count_icon" />
 
         <TextView
-            android:id="@+id/project_item_note_count"
+            android:id="@+id/project_item_text_count"
             android:text="0"
             android:gravity="center"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_below="@id/project_item_text_note_count_icon"
+            android:layout_below="@id/project_item_text_count_icon"
             android:layout_toRightOf="@id/project_item_timer" />
 
         <TextView
@@ -72,7 +72,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_below="@id/project_item_text_list_count_icon"
-            android:layout_toRightOf="@id/project_item_note_count" />
+            android:layout_toRightOf="@id/project_item_text_count" />
 
         <TextView
             android:id="@+id/project_item_camera_count"

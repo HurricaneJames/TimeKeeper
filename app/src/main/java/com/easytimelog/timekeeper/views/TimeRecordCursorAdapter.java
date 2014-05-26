@@ -54,11 +54,16 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
         String endAt   = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.TimeRecords.END_AT));
         Period duration = new Period(new DateTime(startAt), new DateTime(endAt));
 
-        String notes = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.TimeRecords.NOTE_COUNT));
+        String notes = getNoteCount(context, cursor, cursor.getColumnIndex(TimeKeeperContract.TimeRecords.NOTE_COUNT));
 
         noteCount.setText(notes);
         description.setText(context.getString(R.string.started) + " " + DateFormatter.getHumanFriendlyDate(new DateTime(startAt)));
         timer.setText(DateFormatter.DEFAULT.print(duration));
+    }
+
+    private String getNoteCount(Context context, Cursor projectCursor, int noteColumn) {
+        int count = projectCursor.getInt(noteColumn);
+        return "" + count + " " + ((count == 1) ? context.getString(R.string.note) : context.getString(R.string.notes));
     }
 
     @Override

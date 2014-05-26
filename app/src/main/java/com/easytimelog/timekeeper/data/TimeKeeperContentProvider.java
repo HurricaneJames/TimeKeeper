@@ -3,6 +3,7 @@ package com.easytimelog.timekeeper.data;
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
@@ -13,15 +14,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
-
-import com.easytimelog.timekeeper.devtools.DatabaseUtils;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,6 +31,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
     private static final int TIME_RECORD_ID   = 4;
     private static final int NOTE_LIST        = 5;
     private static final int NOTE_ID          = 6;
+    private static final int NOTE_COUNTS      = 7;
     static {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
         URI_MATCHER.addURI(TimeKeeperContract.AUTHORITY, "projects",       PROJECT_LIST);
@@ -42,6 +40,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
         URI_MATCHER.addURI(TimeKeeperContract.AUTHORITY, "time_records/#", TIME_RECORD_ID);
         URI_MATCHER.addURI(TimeKeeperContract.AUTHORITY, "notes",          NOTE_LIST);
         URI_MATCHER.addURI(TimeKeeperContract.AUTHORITY, "notes/#",        NOTE_ID);
+        URI_MATCHER.addURI(TimeKeeperContract.AUTHORITY, "notes/counts/#", NOTE_COUNTS);
     }
 
     private TimeKeeperSqlOpenHelper mOpenHelper;
@@ -69,6 +68,8 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 return TimeKeeperContract.Notes.CONTENT_TYPE;
             case NOTE_ID:
                 return TimeKeeperContract.Notes.CONTENT_ITEM_TYPE;
+            case NOTE_COUNTS:
+                return TimeKeeperContract.Notes.CONTENT_TYPE + ".count";
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -106,6 +107,14 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 builder.setTables(TimeKeeperContract.Notes.TABLE_NAME);
                 builder.appendWhere(TimeKeeperContract.Notes._ID + " = " + uri.getLastPathSegment());
                 break;
+            case NOTE_COUNTS:
+                builder.setTables(TimeKeeperContract.Notes.TABLE_NAME);
+                String projectId = getProjectIdForTimeRecord(uri.getLastPathSegment());
+                String[] countProjection = new String[] { TimeKeeperContract.Notes.NOTE_TYPE, "count(" + TimeKeeperContract.Notes.NOTE_TYPE + ") as " + TimeKeeperContract.Notes.NOTE_TYPE + "_count"};
+                String   countSelection = TimeKeeperContract.Notes.TIME_RECORD_ID + " in (select " + TimeKeeperContract.TimeRecords.TABLE_NAME + '.' + TimeKeeperContract.TimeRecords._ID + " from " + TimeKeeperContract.TimeRecords.TABLE_NAME + " where " + TimeKeeperContract.TimeRecords.TABLE_NAME + '.' + TimeKeeperContract.TimeRecords.PROJECT_ID + " = " + projectId + ")";
+                Cursor countCursor = builder.query(db, countProjection, countSelection, selectionArgs, TimeKeeperContract.Notes.NOTE_TYPE, null, null);
+                countCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                return countCursor;
             default:
                 throw new IllegalArgumentException("Unsupported URI for query: " + uri);
         }
@@ -138,10 +147,12 @@ public class TimeKeeperContentProvider extends ContentProvider {
             case TIME_RECORD_LIST:
                 verifyTimeRecordColumns(contentValues);
                 retUri = getUriForId(uri, db.insert(TimeKeeperContract.TimeRecords.TABLE_NAME, null, contentValues));
-                updateProjectCache(contentValues.getAsString(TimeKeeperContract.TimeRecords.PROJECT_ID));
+                updateProjectTimeRecordCache(contentValues.getAsString(TimeKeeperContract.TimeRecords.PROJECT_ID));
                 return retUri;
             case NOTE_LIST:
-                return getUriForId(uri, db.insert(TimeKeeperContract.Notes.TABLE_NAME, null, contentValues));
+                retUri = getUriForId(uri, db.insert(TimeKeeperContract.Notes.TABLE_NAME, null, contentValues));
+                updateProjectNoteCacheFromTimeRecord(contentValues.getAsString(TimeKeeperContract.Notes.TIME_RECORD_ID));
+                return retUri;
             default:
                 throw new IllegalArgumentException("Unsupported URI for insertion: " + uri);
         }
@@ -160,12 +171,12 @@ public class TimeKeeperContentProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // TODO - update insert/delete/update for time records to update project cache... w/ corresponding no_cache contentValues... add some kind of way to notify that caching is a good thing
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int deletedCount = 0,
             uriMatch = URI_MATCHER.match(uri),
             id = (uriMatch == PROJECT_ID || uriMatch == TIME_RECORD_ID || uriMatch == NOTE_ID) ? id = Integer.parseInt(uri.getLastPathSegment()) : -1;
         String where = getWhere(id, selection);
+        Set<String> projectIds;
 
         switch(uriMatch) {
             case PROJECT_ID:
@@ -174,15 +185,20 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 break;
             case TIME_RECORD_ID:
             case TIME_RECORD_LIST:
-                Set<String> projectIds = getProjectIdsForTimeRecords(uri, selection, selectionArgs);
+                projectIds = getProjectIdsForTimeRecords(uri, selection, selectionArgs);
                 deletedCount = db.delete(TimeKeeperContract.TimeRecords.TABLE_NAME, where, selectionArgs);
                 if(deletedCount > 0) {
-                    updateProjectCache(projectIds);
+                    updateProjectTimeRecordCache(projectIds);
+                    updateProjectNoteCache(projectIds);
                 }
                 break;
             case NOTE_ID:
             case NOTE_LIST:
                 deletedCount = db.delete(TimeKeeperContract.Notes.TABLE_NAME, where, selectionArgs);
+                if(deletedCount > 0) {
+                    projectIds = getProjectIdsForNotes(uri, selection, selectionArgs);
+                    updateProjectNoteCache(projectIds);
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI for delete: " + uri);
@@ -212,12 +228,16 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 if(updateCount > 0) {
                     // check for any updates (in case the change was moving to a different project)
                     getProjectIdsForTimeRecords(uri, selection, selectionArgs, projectIds);
-                    updateProjectCache(projectIds);
+                    updateProjectTimeRecordCache(projectIds);
                 }
                 break;
             case NOTE_ID:
             case NOTE_LIST:
                 updateCount = db.update(TimeKeeperContract.Notes.TABLE_NAME, values, where, selectionArgs);
+                if(updateCount > 0) {
+                    projectIds = getProjectIdsForNotes(uri, selection, selectionArgs);
+                    updateProjectNoteCache(projectIds);
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI for update: " + uri);
@@ -286,12 +306,12 @@ public class TimeKeeperContentProvider extends ContentProvider {
         return where;
     }
 
-    private void updateProjectCache(Set<String> projectIds) {
+    private void updateProjectTimeRecordCache(Set<String> projectIds) {
         for(String projectId:projectIds) {
-            updateProjectCache(projectId);
+            updateProjectTimeRecordCache(projectId);
         }
     }
-    private void updateProjectCache(String projectId) {
+    private void updateProjectTimeRecordCache(String projectId) {
         boolean running = false;
         int runningTimeRecordId = -1;
         DateTime projectStartAt = null;
@@ -352,16 +372,59 @@ public class TimeKeeperContentProvider extends ContentProvider {
         getContext().getContentResolver().update(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, Long.parseLong(projectId)), values, null, null);
     }
 
-    private static final String[] TIME_RECORD_PROJECT_ID = { TimeKeeperContract.TimeRecords.PROJECT_ID };
+    private void updateProjectNoteCacheFromTimeRecord(Set<String> timeRecordIds) { for(String projectId:timeRecordIds) { updateProjectNoteCacheFromTimeRecord(timeRecordIds); } }
+    private void updateProjectNoteCacheFromTimeRecord(String timeRecordId) {
+        updateProjectNoteCache(getProjectIdForTimeRecord(timeRecordId));
+    }
+
+    private void updateProjectNoteCache(Set<String> projectIds) { for(String projectId:projectIds) { updateProjectNoteCache(projectId); } }
+    private void updateProjectNoteCache(String projectId) {
+        ContentResolver resolver = getContext().getContentResolver();
+        long lProjectId = Long.parseLong(projectId);
+        Cursor countCursor = resolver.query( ContentUris.withAppendedId(Uri.withAppendedPath(TimeKeeperContract.Notes.CONTENT_URI, "counts"), lProjectId), null, null, null, null);
+        ContentValues values = new ContentValues();
+            // BLANK CACHE
+            values.put(TimeKeeperContract.Projects.TEXT_NOTE_COUNT, 0);
+            values.put(TimeKeeperContract.Projects.LIST_NOTE_COUNT, 0);
+            values.put(TimeKeeperContract.Projects.CAMERA_NOTE_COUNT, 0);
+            values.put(TimeKeeperContract.Projects.AUDIO_NOTE_COUNT, 0);
+        if(countCursor.moveToFirst()) {
+            int typeIndex = countCursor.getColumnIndex(TimeKeeperContract.Notes.NOTE_TYPE);
+            int countIndex = countCursor.getColumnIndex(TimeKeeperContract.Notes.NOTE_TYPE + "_count");
+            do {
+                values.put(countCursor.getString(typeIndex) + "_note_count", countCursor.getString(countIndex));
+            } while (countCursor.moveToNext());
+        }
+        countCursor.close();
+        resolver.update(ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, lProjectId), values, null, null);
+    }
+
     private Set<String> getProjectIdsForTimeRecords(Uri contentUri, String selection, String[] selectionArgs, Set<String> projectIds) {
-        Cursor cursor = getContext().getContentResolver().query(contentUri, TIME_RECORD_PROJECT_ID, selection, selectionArgs, null);
-        getIdsFromCursor(cursor,cursor.getColumnIndex(TimeKeeperContract.TimeRecords.PROJECT_ID), projectIds);
-        cursor.close();
-        return projectIds;
+        return getIds(contentUri, TimeKeeperContract.TimeRecords.PROJECT_ID, selection, selectionArgs, projectIds);
     }
     private Set<String> getProjectIdsForTimeRecords(Uri contentUri, String selection, String[] selectionArgs) {
         HashSet<String> projectIds = new HashSet<String>();
         return getProjectIdsForTimeRecords(contentUri, selection, selectionArgs, projectIds);
+    }
+
+    private Set<String> getProjectIdsForNotes(Uri contentUri, String selection, String[] selectionArgs, Set<String> projectIds) {
+        Set<String> timeRecordIds = getIds(contentUri, TimeKeeperContract.Notes.TIME_RECORD_ID, selection, selectionArgs, projectIds);
+        return getProjectIdsForTimeRecords(TimeKeeperContract.TimeRecords.CONTENT_URI, null, null, projectIds);
+    }
+    private Set<String> getProjectIdsForNotes(Uri contentUri, String selection, String[] selectionArgs) {
+        HashSet<String> projectIds = new HashSet<String>();
+        return getProjectIdsForNotes(contentUri, selection, selectionArgs, projectIds);
+    }
+
+    private Set<String> getIds(Uri contentUri, String idColumnName, String selection, String[] selectionArgs) {
+        HashSet<String> idSet = new HashSet<String>();
+        return getIds(contentUri, idColumnName, selection, selectionArgs, idSet);
+    }
+    private Set<String> getIds(Uri contentUri, String idColumnName, String selection, String[] selectionArgs, Set<String> idSet) {
+        Cursor cursor = getContext().getContentResolver().query(contentUri, new String[] { idColumnName }, selection, selectionArgs, null);
+        getIdsFromCursor(cursor,cursor.getColumnIndex(idColumnName), idSet);
+        cursor.close();
+        return idSet;
     }
 
     private Set<String> getIdsFromCursor(Cursor cursor, int idColumn, Set<String> intoSet) {
@@ -374,5 +437,18 @@ public class TimeKeeperContentProvider extends ContentProvider {
     private Set<String> getIdsFromCursor(Cursor cursor, int idColumn) {
         HashSet<String> ids = new HashSet<String>();
         return getIdsFromCursor(cursor, idColumn, ids);
+    }
+
+    private String getProjectIdForTimeRecord(String timeRecordId) {
+        Cursor cursor = getContext().getContentResolver().query(ContentUris.withAppendedId(TimeKeeperContract.TimeRecords.CONTENT_URI, Long.parseLong(timeRecordId)), new String[] {TimeKeeperContract.TimeRecords.PROJECT_ID }, null, null, null);
+        if(!cursor.moveToFirst()) { return null; }
+        String projectId = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.TimeRecords.PROJECT_ID));
+        cursor.close();
+        return projectId;
+    }
+
+    private Set<String> getAllProjectIds() {
+        Cursor cursor = getContext().getContentResolver().query(TimeKeeperContract.Projects.CONTENT_URI, new String[] { TimeKeeperContract.Projects._ID }, null, null, null);
+        return getIdsFromCursor(cursor, cursor.getColumnIndex(TimeKeeperContract.Projects._ID));
     }
 }

@@ -35,8 +35,17 @@ public class ProjectCursorAdapter extends CursorAdapter {
         long    duration  = cursor.getLong(cursor.getColumnIndex(TimeKeeperContract.Projects.DURATION));
         int     runningTimeRecordId = cursor.getInt(cursor.getColumnIndex(TimeKeeperContract.Projects.RUNNING_TIME_RECORD));
 
+        String textCount   = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.TEXT_NOTE_COUNT));
+        String listCount   = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.LIST_NOTE_COUNT));
+        String cameraCount = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.CAMERA_NOTE_COUNT));
+        String audioCount  = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.AUDIO_NOTE_COUNT));
+
         TextView nameButton = (TextView)view.findViewById(R.id.project_item_name);
         TimerButton timerButton = (TimerButton)view.findViewById(R.id.project_item_timer);
+        ((TextView)view.findViewById(R.id.project_item_text_count)).setText(textCount);
+        ((TextView)view.findViewById(R.id.project_item_list_count)).setText(listCount);
+        ((TextView)view.findViewById(R.id.project_item_camera_count)).setText(cameraCount);
+        ((TextView)view.findViewById(R.id.project_item_audio_count)).setText(audioCount);
 
         nameButton.setText(name);
         timerButton.setOnClickListener(new TimerClickListener(context, projectId, running, runningTimeRecordId, startedAt));

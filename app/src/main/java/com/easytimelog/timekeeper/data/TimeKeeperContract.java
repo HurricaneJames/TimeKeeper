@@ -24,7 +24,13 @@ public final class TimeKeeperContract {
         public static final String RUNNING = "currently_running";
         public static final String RUNNING_TIME_RECORD = "running_time_record_id";
         public static final String STARTED_AT = "cached_start_at";
-        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, NAME, DURATION, RUNNING, RUNNING_TIME_RECORD, STARTED_AT, CREATED_AT, UPDATED_AT };
+
+        public static final String TEXT_NOTE_COUNT   = "text_note_count";
+        public static final String LIST_NOTE_COUNT   = "list_note_count";
+        public static final String CAMERA_NOTE_COUNT = "camera_note_count";
+        public static final String AUDIO_NOTE_COUNT  = "audio_note_count";
+
+        public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, NAME, DURATION, RUNNING, RUNNING_TIME_RECORD, STARTED_AT, TEXT_NOTE_COUNT, LIST_NOTE_COUNT, CAMERA_NOTE_COUNT, AUDIO_NOTE_COUNT, CREATED_AT, UPDATED_AT };
         public static final String DEFAULT_SORT_ORDER = UPDATED_AT + " DESC";
     }
     public static final class TimeRecords implements CommonColumns {
