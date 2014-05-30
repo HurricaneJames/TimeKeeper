@@ -4,13 +4,12 @@ import android.app.Activity;
 import android.content.AsyncQueryHandler;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.easytimelog.timekeeper.R;
@@ -22,23 +21,27 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
 
     private static final String ARG_NOTE_ID = "note_id";
     private static final String ARG_TIME_RECORD_ID = "time_record_id";
+    private static final String ARG_PROJECT_ID = "project_id";
     private static final long INVALID_NOTE_ID = -1;
 
     private long   mNoteId;
     private String mTimeRecordId;
+    private String mProjectId;
     private EditText mScribbleField;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
+     * @param projectId Id of the project currently holding the time record [required].
      * @param timeRecordId Id of time record that holds note [required].
      * @param noteId Id of note to represent [optional - null means new note].
      * @return A new instance of fragment TextNoteFragment.
      */
-    public static TextNoteFragment newInstance(String timeRecordId, String noteId) {
+    public static TextNoteFragment newInstance(String projectId, String timeRecordId, String noteId) {
         TextNoteFragment fragment = new TextNoteFragment();
         Bundle args = new Bundle();
+        args.putString(ARG_PROJECT_ID, projectId);
         args.putString(ARG_TIME_RECORD_ID, timeRecordId);
         if(noteId != null) { args.putString(ARG_NOTE_ID, noteId); }
         fragment.setArguments(args);
@@ -51,6 +54,7 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            mProjectId = getArguments().getString(ARG_PROJECT_ID);
             mNoteId = getArguments().getLong(ARG_NOTE_ID, INVALID_NOTE_ID);
             mTimeRecordId = getArguments().getString(ARG_TIME_RECORD_ID);
         }
@@ -86,24 +90,30 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        boolean saving = false;
-        if(view.getId() == R.id.saveButton) { saving = true; }
-        complete(saving);
+        notifyChangeListener(view.getId() == R.id.saveButton);
     }
 
-    private void complete(boolean saveNote) {
-        if(saveNote) {
-            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getActivity().getApplicationContext().getContentResolver()) {};
-            ContentValues values = new ContentValues();
+    private void notifyChangeListener(boolean saveNote) {
+        ContentValues values = new ContentValues();
+            values.put(TimeKeeperContract.TimeRecords.PROJECT_ID, mProjectId);
             values.put(TimeKeeperContract.Notes.TIME_RECORD_ID, mTimeRecordId);
-            values.put(TimeKeeperContract.Notes.NOTE_TYPE, TimeKeeperContract.Notes.TEXT_NOTE);
-            values.put(TimeKeeperContract.Notes.SCRIBBLE, mScribbleField.getText().toString());
-            if(mNoteId != INVALID_NOTE_ID) {
-                queryHandler.startUpdate(0, null, ContentUris.withAppendedId(TimeKeeperContract.Notes.CONTENT_URI, mNoteId), values, null, null);
-            }else {
-                queryHandler.startInsert(0, null, TimeKeeperContract.Notes.CONTENT_URI, values);
-            }
+            if(saveNote) { values.putAll(saveNote()); }
+            if(mNoteId != INVALID_NOTE_ID) { values.put(TimeKeeperContract.TimeRecords._ID, mNoteId); }
+
+        mListener.onNoteChanged(saveNote ? OnNoteChangeListener.RESULT_ACCEPT : OnNoteChangeListener.RESULT_CANCEL, values);
+    }
+
+    private ContentValues saveNote() { return saveNote(new ContentValues()); }
+    private ContentValues saveNote(ContentValues values) {
+        AsyncQueryHandler queryHandler = new AsyncQueryHandler(getActivity().getApplicationContext().getContentResolver()) {};
+        values.put(TimeKeeperContract.Notes.TIME_RECORD_ID, mTimeRecordId);
+        values.put(TimeKeeperContract.Notes.NOTE_TYPE, TimeKeeperContract.Notes.TEXT_NOTE);
+        values.put(TimeKeeperContract.Notes.SCRIBBLE, mScribbleField.getText().toString());
+        if(mNoteId != INVALID_NOTE_ID) {
+            queryHandler.startUpdate(0, null, ContentUris.withAppendedId(TimeKeeperContract.Notes.CONTENT_URI, mNoteId), values, null, null);
+        }else {
+            queryHandler.startInsert(0, null, TimeKeeperContract.Notes.CONTENT_URI, values);
         }
-        mListener.onNoteChanged(saveNote ? OnNoteChangeListener.RESULT_ACCEPT : OnNoteChangeListener.RESULT_CANCEL);
+        return values;
     }
 }

@@ -50,6 +50,7 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
 
 
     public static ProjectDetailsFragment newInstance(String projectId) {
+Log.d("ProjectDetailsFragment", "Creating New Instance For Project: " + projectId);
         ProjectDetailsFragment fragment = new ProjectDetailsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PROJECT_ID, projectId);

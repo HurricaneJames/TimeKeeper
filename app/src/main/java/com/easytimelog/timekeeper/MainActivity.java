@@ -3,6 +3,7 @@ package com.easytimelog.timekeeper;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -119,12 +120,12 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     public void onNoteUpdateRequested(String noteId) { /* todo - implement in version 2 */ }
 
     @Override
-    public void onNoteChanged(int result) {
+    public void onNoteChanged(int result, ContentValues values) {
         Log.d("MainActivity", "OnNoteChanged: " + result);
         // remove the fragment
-        Fragment noteFragment = getFragmentManager().findFragmentById(R.id.details_container);
+        Fragment projectDetailsFragment = ProjectDetailsFragment.newInstance(values.getAsString(TimeKeeperContract.TimeRecords.PROJECT_ID));
         getFragmentManager().beginTransaction()
-                .remove(noteFragment)
+                .replace(R.id.details_container, projectDetailsFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
 
@@ -148,7 +149,7 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
             super.onPostExecute(values);
 
             if(mDualPane) {
-                TextNoteFragment noteFragment = TextNoteFragment.newInstance(values.getString(ARG_TIME_RECORD_ID), null);
+                TextNoteFragment noteFragment = TextNoteFragment.newInstance(values.getString(ARG_PROJECT_ID), values.getString(ARG_TIME_RECORD_ID), null);
                 getFragmentManager().beginTransaction()
                         .replace(R.id.details_container, noteFragment)
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)

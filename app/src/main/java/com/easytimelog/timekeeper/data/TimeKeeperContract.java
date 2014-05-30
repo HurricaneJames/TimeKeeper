@@ -61,7 +61,7 @@ public final class TimeKeeperContract {
                 Projects.TABLE_NAME + '.' + Projects.NAME + " AS " + PROJECT_NAME};
         public static final String TIME_RECORDS_WITH_PROJECTS = TABLE_NAME + " LEFT OUTER JOIN " + Projects.TABLE_NAME + " ON(time_records." + PROJECT_ID + " = projects." + CommonColumns._ID + ")";
 
-        public static final String DEFAULT_SORT_ORDER = START_AT + " ASC";
+        public static final String DEFAULT_SORT_ORDER = START_AT + " DESC";
 
         public static final String whereProjectId(String projectId) {
             return TABLE_NAME + "." + PROJECT_ID + "=" + projectId;
