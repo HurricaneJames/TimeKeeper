@@ -35,8 +35,8 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
 
     public interface OnTimeRecordSelectedListener { public void onTimeRecordSelected(String id); }
     private static final String ARG_PROJECT_ID = "projectId";
-    private int mProjectId;
-    public int getShownProjectId() { return mProjectId; }
+    private String mProjectId;
+    public String getShownProjectId() { return mProjectId; }
 
     private static final int TIME_RECORDS_LOADER = 0;
     private static final int PROJECT_LOADER = 1;
@@ -49,10 +49,10 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
     private CursorTreeAdapter mAdapter;
 
 
-    public static ProjectDetailsFragment newInstance(int projectId) {
+    public static ProjectDetailsFragment newInstance(String projectId) {
         ProjectDetailsFragment fragment = new ProjectDetailsFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_PROJECT_ID, projectId);
+        args.putString(ARG_PROJECT_ID, projectId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -63,7 +63,7 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mProjectId = getArguments().getInt(ARG_PROJECT_ID);
+            mProjectId = getArguments().getString(ARG_PROJECT_ID);
         }
     }
 
@@ -110,7 +110,7 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
                 return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL, TimeKeeperContract.TimeRecords.whereProjectId(mProjectId), null, null);
             case PROJECT_LOADER:
                 return new CursorLoader(getActivity().getApplicationContext(),
-                        ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, mProjectId),
+                        ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, Long.parseLong(mProjectId)),
                         new String[] { TimeKeeperContract.Projects.NAME },
                         null, null, null);
         }
@@ -159,7 +159,7 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
                         ContentValues values = new ContentValues();
                         values.put(TimeKeeperContract.Projects.NAME, newName);
                         context.getApplicationContext().getContentResolver().update(
-                                ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, mProjectId),
+                                ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, Long.parseLong(mProjectId)),
                                 values, null, null);
                     }
                 };

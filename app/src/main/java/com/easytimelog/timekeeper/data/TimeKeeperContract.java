@@ -63,7 +63,7 @@ public final class TimeKeeperContract {
 
         public static final String DEFAULT_SORT_ORDER = START_AT + " ASC";
 
-        public static final String whereProjectId(int projectId) {
+        public static final String whereProjectId(String projectId) {
             return TABLE_NAME + "." + PROJECT_ID + "=" + projectId;
         }
     }
@@ -85,6 +85,11 @@ public final class TimeKeeperContract {
         public static final String whereTimeRecordId(int timeRecordId) {
             return TABLE_NAME + '.' + TIME_RECORD_ID + "=" + timeRecordId;
         }
+
+        public static final String TEXT_NOTE = "text";
+        public static final String LIST_NOTE = "list";
+        public static final String CAMERA_NOTE = "camera";
+        public static final String AUDIO_NOTE = "audio";
     }
 
     public static interface CommonColumns extends BaseColumns {

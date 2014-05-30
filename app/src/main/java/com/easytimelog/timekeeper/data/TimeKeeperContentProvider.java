@@ -15,6 +15,8 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.easytimelog.timekeeper.util.DatabaseHelper;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -422,21 +424,9 @@ public class TimeKeeperContentProvider extends ContentProvider {
     }
     private Set<String> getIds(Uri contentUri, String idColumnName, String selection, String[] selectionArgs, Set<String> idSet) {
         Cursor cursor = getContext().getContentResolver().query(contentUri, new String[] { idColumnName }, selection, selectionArgs, null);
-        getIdsFromCursor(cursor,cursor.getColumnIndex(idColumnName), idSet);
+        DatabaseHelper.getIdsFromCursor(cursor, cursor.getColumnIndex(idColumnName), idSet);
         cursor.close();
         return idSet;
-    }
-
-    private Set<String> getIdsFromCursor(Cursor cursor, int idColumn, Set<String> intoSet) {
-        if(!cursor.moveToFirst()) { return intoSet; }
-        do {
-            intoSet.add(cursor.getString(idColumn));
-        }while(cursor.moveToNext());
-        return intoSet;
-    }
-    private Set<String> getIdsFromCursor(Cursor cursor, int idColumn) {
-        HashSet<String> ids = new HashSet<String>();
-        return getIdsFromCursor(cursor, idColumn, ids);
     }
 
     private String getProjectIdForTimeRecord(String timeRecordId) {
@@ -449,6 +439,6 @@ public class TimeKeeperContentProvider extends ContentProvider {
 
     private Set<String> getAllProjectIds() {
         Cursor cursor = getContext().getContentResolver().query(TimeKeeperContract.Projects.CONTENT_URI, new String[] { TimeKeeperContract.Projects._ID }, null, null, null);
-        return getIdsFromCursor(cursor, cursor.getColumnIndex(TimeKeeperContract.Projects._ID));
+        return DatabaseHelper.getIdsFromCursor(cursor, cursor.getColumnIndex(TimeKeeperContract.Projects._ID));
     }
 }

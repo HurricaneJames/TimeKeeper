@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.easytimelog.timekeeper.views.TextNoteFragment">
+
+    <TextView
+        android:text="@string/note"
+        android:textSize="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="35dp" />
+
+    <EditText
+        android:id="@+id/text_note_scribble"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="top|left"
+        android:inputType="textMultiLine"
+        android:imeOptions="actionDone"
+        android:scrollbars="vertical"/>
+
+    <Button
+        android:id="@+id/saveButton"
+        android:text="@string/save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0" />
+
+    <Button
+        android:id="@+id/cancelButton"
+        android:text="@string/cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0" />
+
+</LinearLayout>

@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         tools:layout="@layout/fragment_projects" />
     <FrameLayout
-        android:id="@+id/time_records_container"
+        android:id="@+id/details_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

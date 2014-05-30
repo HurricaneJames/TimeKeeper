@@ -4,9 +4,14 @@
     <string name="app_name">Time Keeper</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_project_detail">ProjectDetailActivity</string>
+    <string name="title_activity_note_taker">Note</string>
 
     <string name="generic_new">New</string>
     <string name="started">Started</string>
     <string name="note">Note</string>
     <string name="notes">Notes</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+
 </resources>

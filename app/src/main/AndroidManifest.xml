@@ -32,6 +32,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.easytimelog.timekeeper.MainActivity" />
         </activity>
+        <activity
+            android:name="com.easytimelog.timekeeper.views.NoteTakerActivity"
+            android:label="@string/title_activity_note_taker"
+            android:parentActivityName="com.easytimelog.timekeeper.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.easytimelog.timekeeper.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

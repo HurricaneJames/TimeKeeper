@@ -2,31 +2,23 @@ package com.easytimelog.timekeeper.views;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.easytimelog.timekeeper.R;
 
-public class ProjectDetailActivity extends Activity implements ProjectDetailsFragment.OnTimeRecordSelectedListener {
-    public static final String EXTRA_PROJECT_ID = "projectId";
+public class NoteTakerActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_project_detail);
-        if(savedInstanceState == null) {
-            String projectId = getIntent().getStringExtra(EXTRA_PROJECT_ID);
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, ProjectDetailsFragment.newInstance(projectId))
-                    .commit();
-        }
+        setContentView(R.layout.activity_note_taker);
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.project_detail, menu);
+        getMenuInflater().inflate(R.menu.note_taker, menu);
         return true;
     }
 
@@ -40,10 +32,5 @@ public class ProjectDetailActivity extends Activity implements ProjectDetailsFra
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onTimeRecordSelected(String id) {
-        Log.d("ProjectDetailActivity", "TODO - Implement something for onTimeRecordsSelected");
     }
 }

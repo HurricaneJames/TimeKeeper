@@ -29,15 +29,17 @@ import com.easytimelog.timekeeper.data.TimeKeeperContract;
 import org.joda.time.DateTime;
 
 public class ProjectsFragment extends Fragment implements AbsListView.OnItemClickListener,
-                                                          LoaderManager.LoaderCallbacks<Cursor> {
+                                                          OnNoteRequestedListener,
+                                                          LoaderManager.LoaderCallbacks<Cursor>{
 
-    public interface OnProjectSelectedListener { public void onProjectSelected(int projectId); }
+    public interface OnProjectSelectedListener { public void onProjectSelected(String projectId); }
 
     private static final String SELECTED_PROJECT = "selectedProject";
     private static final int INVALID_SELECTED_INDEX = -1;
 
     private Context context;
-    private OnProjectSelectedListener mListener;
+    private OnProjectSelectedListener mProjectSelectionListener;
+    private OnNoteRequestedListener mNoteRequestedListener;
     private AbsListView mListView;
     private CursorAdapter mAdapter;
     private Handler timerButtonUpdateHandler;
@@ -62,7 +64,7 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         mListView = (AbsListView) view.findViewById(android.R.id.list);
 
         mListView.setOnItemClickListener(this);
-        mAdapter = new ProjectCursorAdapter(this.context, null, 0);
+        mAdapter = new ProjectCursorAdapter(this, this.context, null, 0);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
         mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
@@ -82,9 +84,10 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnProjectSelectedListener) activity;
+            mProjectSelectionListener = (OnProjectSelectedListener) activity;
+            mNoteRequestedListener = (OnNoteRequestedListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnProjectSelectedListener");
+            throw new ClassCastException(activity.toString() + " must implement OnProjectSelectedListener and OnNoteSelectedListener");
         }
     }
 
@@ -114,7 +117,7 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        mProjectSelectionListener = null;
     }
 
     @Override
@@ -130,10 +133,18 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         mListView.setItemChecked(mCurrentPosition, true);
 
         Cursor positionCursor = (Cursor)mAdapter.getItem(position);
-        int projectId = positionCursor.getInt(positionCursor.getColumnIndex(TimeKeeperContract.Projects._ID));
-        if (null != mListener) { mListener.onProjectSelected(projectId); }
+        String projectId = positionCursor.getString(positionCursor.getColumnIndex(TimeKeeperContract.Projects._ID));
+        if (null != mProjectSelectionListener) { mProjectSelectionListener.onProjectSelected(projectId); }
     }
 
+    @Override
+    public void onNewNoteRequested(String projectId, String noteType) {
+        mNoteRequestedListener.onNewNoteRequested(projectId, noteType);
+    }
+
+    // project fragment will never receive or need an update event
+    @Override
+    public void onNoteUpdateRequested(String noteId) { }
 
     private static final int PROJECTS_LOADER = 0;
     private static final int TIME_RECORDS_LOADER = 1;
