@@ -22,9 +22,9 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_NOTE_ID = "note_id";
     private static final String ARG_TIME_RECORD_ID = "time_record_id";
     private static final String ARG_PROJECT_ID = "project_id";
-    private static final long INVALID_NOTE_ID = -1;
+    private static final String INVALID_NOTE_ID = null;
 
-    private long   mNoteId;
+    private String mNoteId;
     private String mTimeRecordId;
     private String mProjectId;
     private EditText mScribbleField;
@@ -45,6 +45,7 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
         args.putString(ARG_TIME_RECORD_ID, timeRecordId);
         if(noteId != null) { args.putString(ARG_NOTE_ID, noteId); }
         fragment.setArguments(args);
+
         return fragment;
     }
     public TextNoteFragment() {
@@ -55,7 +56,7 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mProjectId = getArguments().getString(ARG_PROJECT_ID);
-            mNoteId = getArguments().getLong(ARG_NOTE_ID, INVALID_NOTE_ID);
+            mNoteId = getArguments().getString(ARG_NOTE_ID);
             mTimeRecordId = getArguments().getString(ARG_TIME_RECORD_ID);
         }
     }
@@ -110,7 +111,7 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
         values.put(TimeKeeperContract.Notes.NOTE_TYPE, TimeKeeperContract.Notes.TEXT_NOTE);
         values.put(TimeKeeperContract.Notes.SCRIBBLE, mScribbleField.getText().toString());
         if(mNoteId != INVALID_NOTE_ID) {
-            queryHandler.startUpdate(0, null, ContentUris.withAppendedId(TimeKeeperContract.Notes.CONTENT_URI, mNoteId), values, null, null);
+            queryHandler.startUpdate(0, null, ContentUris.withAppendedId(TimeKeeperContract.Notes.CONTENT_URI, Long.parseLong(mNoteId)), values, null, null);
         }else {
             queryHandler.startInsert(0, null, TimeKeeperContract.Notes.CONTENT_URI, values);
         }

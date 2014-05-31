@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
 import com.easytimelog.timekeeper.devtools.DatabaseUtils;
 import com.easytimelog.timekeeper.util.DatabaseHelper;
+import com.easytimelog.timekeeper.views.NoteTakerActivity;
 import com.easytimelog.timekeeper.views.OnNoteChangeListener;
 import com.easytimelog.timekeeper.views.OnNoteRequestedListener;
 import com.easytimelog.timekeeper.views.ProjectDetailActivity;
@@ -31,21 +32,22 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
                                                       OnNoteChangeListener,
                                                       OnNoteRequestedListener {
 
+    public static final int ADD_NEW_NOTE = 0;
     private boolean mDualPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
 
+        mDualPane = findViewById(R.id.details_container) != null;
+        ProjectsFragment projectListFragment = ProjectsFragment.newInstance(mDualPane);
+        if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new ProjectsFragment())
+                    .add(R.id.container, projectListFragment)
                     .commit();
         }
 
-        mDualPane = findViewById(R.id.details_container) != null;
     }
 
     @Override
@@ -78,6 +80,17 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("MainActivity", "onActivityResult");
+        super.onActivityResult(requestCode, resultCode, data);
+        // ignoreing SHOW_DETAILS, only requesting result so we can remove the item highlight
+        if(resultCode == RESULT_OK && requestCode == ADD_NEW_NOTE) {
+            ContentValues noteValues = (ContentValues)data.getParcelableExtra(NoteTakerActivity.NOTE_VALUES);
+            // todo - add toast letting user know that item was (not?) added
+        }
     }
 
     @Override
@@ -147,15 +160,24 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         @Override
         protected void onPostExecute(Bundle values) {
             super.onPostExecute(values);
-
+            // todo - move this out into a method of MainActivity
+            // todo - implement buttons other than text note
+            String projectId = values.getString(ARG_PROJECT_ID);
+            String timeRecordId =  values.getString(ARG_TIME_RECORD_ID);
+            String  noteType = values.getString(ARG_NOTE_TYPE);
             if(mDualPane) {
-                TextNoteFragment noteFragment = TextNoteFragment.newInstance(values.getString(ARG_PROJECT_ID), values.getString(ARG_TIME_RECORD_ID), null);
+                TextNoteFragment noteFragment = TextNoteFragment.newInstance(projectId, timeRecordId, null);
                 getFragmentManager().beginTransaction()
                         .replace(R.id.details_container, noteFragment)
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .commit();
             } else {
-                // todo - open new activity view for note
+                Intent intent = new Intent();
+                intent.setClass(getApplicationContext(), NoteTakerActivity.class);
+                intent.putExtra(NoteTakerActivity.EXTRA_PROJECT_ID, projectId);
+                intent.putExtra(NoteTakerActivity.EXTRA_TIME_RECORD_ID, timeRecordId);
+                intent.putExtra(NoteTakerActivity.EXTRA_NOTE_TYPE, noteType);
+                startActivityForResult(intent, ADD_NEW_NOTE);
             }
 
         }

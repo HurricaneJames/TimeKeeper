@@ -3,6 +3,7 @@ package com.easytimelog.timekeeper.views;
 import android.content.ContentValues;
 
 public interface OnNoteChangeListener {
+    public static final String RESULT = "result";
     public static final int RESULT_ACCEPT = 1;
     public static final int RESULT_CANCEL = 0;
 

@@ -46,4 +46,5 @@ public class ProjectDetailActivity extends Activity implements ProjectDetailsFra
     public void onTimeRecordSelected(String id) {
         Log.d("ProjectDetailActivity", "TODO - Implement something for onTimeRecordsSelected");
     }
+
 }

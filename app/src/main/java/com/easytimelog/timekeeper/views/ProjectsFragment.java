@@ -34,6 +34,8 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
 
     public interface OnProjectSelectedListener { public void onProjectSelected(String projectId); }
 
+    public static final String ARG_HIGHLIGHT_SELECTED_ITEM = "highlighting";
+
     private static final String SELECTED_PROJECT = "selectedProject";
     private static final int INVALID_SELECTED_INDEX = -1;
 
@@ -43,9 +45,25 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
     private AbsListView mListView;
     private CursorAdapter mAdapter;
     private Handler timerButtonUpdateHandler;
+    private boolean mHighlightItems = true;
 
     private int mCurrentPosition = INVALID_SELECTED_INDEX;
 
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param highlighting enable/disable highlighting of selected item.
+     * @return A new instance of fragment TextNoteFragment.
+     */
+    public static ProjectsFragment newInstance(boolean highlighting) {
+        ProjectsFragment fragment = new ProjectsFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(ARG_HIGHLIGHT_SELECTED_ITEM, highlighting);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
     public ProjectsFragment() {
     }
 
@@ -54,6 +72,9 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         super.onCreate(savedInstanceState);
         if(savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(SELECTED_PROJECT, INVALID_SELECTED_INDEX);
+        }
+        if (getArguments() != null) {
+            mHighlightItems = getArguments().getBoolean(ARG_HIGHLIGHT_SELECTED_ITEM, true);
         }
     }
 
@@ -66,7 +87,7 @@ public class ProjectsFragment extends Fragment implements AbsListView.OnItemClic
         mListView.setOnItemClickListener(this);
         mAdapter = new ProjectCursorAdapter(this, this.context, null, 0);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
-        mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        mListView.setChoiceMode(mHighlightItems ? ListView.CHOICE_MODE_SINGLE : ListView.CHOICE_MODE_NONE);
 
         view.findViewById(R.id.projects_list_new_project).setOnClickListener(new View.OnClickListener() {
             @Override
