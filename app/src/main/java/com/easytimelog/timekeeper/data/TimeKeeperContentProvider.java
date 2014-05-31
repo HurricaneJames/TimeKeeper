@@ -92,13 +92,11 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 builder.appendWhere(TimeKeeperContract.Projects._ID + " = " + uri.getLastPathSegment());
                 break;
             case TIME_RECORD_LIST:
-                tableName = getTimeRecordTableName(projection);
-                builder.setTables(tableName);
+                builder.setTables(TimeKeeperContract.TimeRecords.TABLE_NAME);
                 if(TextUtils.isEmpty(sortOrder)) { sortOrder = TimeKeeperContract.TimeRecords.DEFAULT_SORT_ORDER; }
                 break;
             case TIME_RECORD_ID:
-                tableName = getTimeRecordTableName(projection);
-                builder.setTables(tableName);
+                builder.setTables(TimeKeeperContract.TimeRecords.TABLE_NAME);
                 builder.appendWhere(TimeKeeperContract.TimeRecords._ID + " = " + uri.getLastPathSegment());
                 break;
             case NOTE_LIST:
@@ -123,19 +121,6 @@ public class TimeKeeperContentProvider extends ContentProvider {
         Cursor cursor = builder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
-    }
-
-    private String getTimeRecordTableName(String[] projection) {
-        // most of the time this will be the case
-        if(projection == TimeKeeperContract.TimeRecords.PROJECTION_ALL_WITH_PROJECTS) { return TimeKeeperContract.TimeRecords.TIME_RECORDS_WITH_PROJECTS; }
-        // check all the columns to see if we need to join the projects table
-        for(String columnName:projection) {
-            if(columnName.contains(TimeKeeperContract.Projects.TABLE_NAME + '.')) {
-                return TimeKeeperContract.TimeRecords.TIME_RECORDS_WITH_PROJECTS;
-            }
-        }
-        // just need the time_records table
-        return TimeKeeperContract.TimeRecords.TABLE_NAME;
     }
 
     @Override
