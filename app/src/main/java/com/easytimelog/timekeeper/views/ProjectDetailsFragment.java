@@ -50,7 +50,6 @@ public class ProjectDetailsFragment extends Fragment implements LoaderManager.Lo
 
 
     public static ProjectDetailsFragment newInstance(String projectId) {
-Log.d("ProjectDetailsFragment", "Creating New Instance For Project: " + projectId);
         ProjectDetailsFragment fragment = new ProjectDetailsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PROJECT_ID, projectId);
@@ -108,9 +107,13 @@ Log.d("ProjectDetailsFragment", "Creating New Instance For Project: " + projectI
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch(id) {
             case TIME_RECORDS_LOADER:
-                return new CursorLoader(this.context, TimeKeeperContract.TimeRecords.CONTENT_URI, TimeKeeperContract.TimeRecords.PROJECTION_ALL, TimeKeeperContract.TimeRecords.whereProjectId(mProjectId), null, null);
+                return new CursorLoader(this.context,
+                        TimeKeeperContract.TimeRecords.CONTENT_URI,
+                        TimeKeeperContract.TimeRecords.PROJECTION_ALL,
+                        TimeKeeperContract.TimeRecords.whereProjectId(mProjectId),
+                        null, null);
             case PROJECT_LOADER:
-                return new CursorLoader(getActivity().getApplicationContext(),
+                return new CursorLoader(this.context,
                         ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, Long.parseLong(mProjectId)),
                         new String[] { TimeKeeperContract.Projects.NAME },
                         null, null, null);
@@ -159,7 +162,7 @@ Log.d("ProjectDetailsFragment", "Creating New Instance For Project: " + projectI
                     public void run() {
                         ContentValues values = new ContentValues();
                         values.put(TimeKeeperContract.Projects.NAME, newName);
-                        context.getApplicationContext().getContentResolver().update(
+                        context.getContentResolver().update(
                                 ContentUris.withAppendedId(TimeKeeperContract.Projects.CONTENT_URI, Long.parseLong(mProjectId)),
                                 values, null, null);
                     }
