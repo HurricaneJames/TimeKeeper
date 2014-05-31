@@ -5,12 +5,19 @@
     android:layout_height="match_parent"
     tools:context="com.easytimelog.timekeeper.views.ProjectDetailsFragment">
 
+    <!-- Dummy item to prevent projectName from receiving focus -->
+    <LinearLayout
+        android:focusable="true" android:focusableInTouchMode="true"
+        android:layout_width="0px" android:layout_height="0px"/>
+
     <EditText
         android:id="@+id/projectName"
-        android:text="Project Name"
+        android:text="@string/loading_project"
         android:inputType="textCapWords"
         android:layout_width="match_parent"
-        android:layout_height="50dp" />
+        android:layout_height="50dp"
+        android:nextFocusUp="@id/projectName"
+        android:nextFocusLeft="@id/projectName" />
 
     <ExpandableListView
         android:id="@android:id/list"

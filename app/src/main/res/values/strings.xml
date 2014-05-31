@@ -12,6 +12,7 @@
     <string name="notes">Notes</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="loading_project">Loading Project...</string>
 
 
 </resources>
