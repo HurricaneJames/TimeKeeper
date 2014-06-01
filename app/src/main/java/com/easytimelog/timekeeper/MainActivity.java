@@ -6,8 +6,11 @@ import android.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +18,7 @@ import android.view.MenuItem;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
 import com.easytimelog.timekeeper.devtools.DatabaseUtils;
 import com.easytimelog.timekeeper.util.DatabaseHelper;
+import com.easytimelog.timekeeper.util.FileHelper;
 import com.easytimelog.timekeeper.views.NoteTakerActivity;
 import com.easytimelog.timekeeper.views.OnNoteChangeListener;
 import com.easytimelog.timekeeper.views.OnNoteRequestedListener;
@@ -24,7 +28,6 @@ import com.easytimelog.timekeeper.views.ProjectsFragment;
 import com.easytimelog.timekeeper.views.TextNoteFragment;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 public class MainActivity extends Activity implements ProjectDetailsFragment.OnTimeRecordSelectedListener,
@@ -32,8 +35,23 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
                                                       OnNoteChangeListener,
                                                       OnNoteRequestedListener {
 
-    public static final int ADD_NEW_NOTE = 0;
+    public static final int ADD_TEXT_NOTE = 0;
+    public static final int ADD_LIST_NOTE = 1;
+    public static final int ADD_CAMERA_NOTE = 2;
+    public static final int ADD_AUDIO_NOTE = 3;
+
+    private ContentValues mExternalNoteActivityParams;
+    private static final String EXTERNAL_PARAMS = "external_params";
+    private static final String EXTERNAL_PROJECT_ID = "project_id";
+    private static final String EXTERNAL_TIME_RECORD_ID = "time_record_id";
+    private static final String EXTERNAL_NOTE_ID = "note_id";
+    private static final String EXTERNAL_LINK = "link";
+    private static final String EXTERNAL_SCRIBBLE = "scribble";
+    private static final String EXTERNAL_NOTE_TYPE = "note_type";
+//    private Uri mCapturedFileUri;
+
     private boolean mDualPane;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +64,15 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
             getFragmentManager().beginTransaction()
                     .add(R.id.container, projectListFragment)
                     .commit();
+        }else {
+            mExternalNoteActivityParams = savedInstanceState.getParcelable(EXTERNAL_PARAMS);
         }
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if(mExternalNoteActivityParams != null) { outState.putParcelable(EXTERNAL_PARAMS, mExternalNoteActivityParams); }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -86,11 +111,29 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("MainActivity", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
-        // ignoreing SHOW_DETAILS, only requesting result so we can remove the item highlight
-        if(resultCode == RESULT_OK && requestCode == ADD_NEW_NOTE) {
-            ContentValues noteValues = (ContentValues)data.getParcelableExtra(NoteTakerActivity.NOTE_VALUES);
-            // todo - add toast letting user know that item was (not?) added
+        ContentValues externalParams = popExternalNoteParams();
+        ContentValues noteValues;
+        // todo - add toast letting user know that item was (not?) added
+        if(resultCode == RESULT_OK) {
+            switch(requestCode) {
+                case ADD_TEXT_NOTE:
+                    // todo - update TextNoteFragment to return the content values instead of adding to the db there? (maybe not?)
+                    // noteValues = (ContentValues)data.getParcelableExtra(NoteTakerActivity.NOTE_VALUES);
+                    break;
+                case ADD_CAMERA_NOTE:
+                    noteValues = new ContentValues();
+                    noteValues.put(TimeKeeperContract.Notes.TIME_RECORD_ID, externalParams.getAsString(EXTERNAL_TIME_RECORD_ID));
+                    noteValues.put(TimeKeeperContract.Notes.LINK, externalParams.getAsString(EXTERNAL_LINK));
+                    noteValues.put(TimeKeeperContract.Notes.NOTE_TYPE, externalParams.getAsString(EXTERNAL_NOTE_TYPE));
+                    DatabaseHelper.addNote(this, noteValues);
+            }
         }
+    }
+
+    public ContentValues getCameraNoteValues(Uri noteLinkUri) {
+        ContentValues values = new ContentValues();
+//        values.put(TimeKeeperContract.Notes.TIME_RECORD_ID, );
+        return null;
     }
 
     @Override
@@ -145,10 +188,75 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         // todo - if a time record was created specifically for this note, stop the clock
     }
 
+    public void pushExternalNoteParams(ContentValues values) {
+        mExternalNoteActivityParams = values;
+    }
+    public ContentValues popExternalNoteParams() {
+        ContentValues t = mExternalNoteActivityParams;
+        mExternalNoteActivityParams = null;
+        return t;
+    }
+
+    public void openNoteView(String projectId, String timeRecordId, String noteType) {
+        if(noteType.equals(TimeKeeperContract.Notes.TEXT_NOTE)) {
+            openTextNoteView(projectId, timeRecordId, noteType);
+        }else if(noteType.equals(TimeKeeperContract.Notes.LIST_NOTE)) {
+        }else if(noteType.equals(TimeKeeperContract.Notes.CAMERA_NOTE)) {
+            openCameraNoteView(projectId, timeRecordId, noteType);
+        }else if(noteType.equals(TimeKeeperContract.Notes.AUDIO_NOTE)) {
+        }
+    }
+
+    public Intent getIntentFor(String projectId, String timeRecordId, String noteType) {
+        Intent intent = new Intent();
+        intent.setClass(getApplicationContext(), NoteTakerActivity.class);
+        intent.putExtra(NoteTakerActivity.EXTRA_PROJECT_ID, projectId);
+        intent.putExtra(NoteTakerActivity.EXTRA_TIME_RECORD_ID, timeRecordId);
+        intent.putExtra(NoteTakerActivity.EXTRA_NOTE_TYPE, noteType);
+        return intent;
+    }
+
+    public void displayNoteFragment(Fragment noteFragment) {
+        getFragmentManager().beginTransaction()
+                .replace(R.id.details_container, noteFragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
+    }
+
+    public void openTextNoteView(String projectId, String timeRecordId, String noteType) {
+        if(mDualPane) {
+            displayNoteFragment(TextNoteFragment.newInstance(projectId, timeRecordId, null));
+        } else {
+            startActivityForResult(getIntentFor(projectId, timeRecordId, noteType), ADD_TEXT_NOTE);
+        }
+    }
+
+    public void openCameraNoteView(String projectId, String timeRecordId, String noteType) {
+        // todo - add ability to save the images inside the app as a setting (default: stored in general photos directory for easy access)
+        Uri capturedFileUri = FileHelper.getOutputFileUri(this, "TimeKeeper", FileHelper.CAMERA_TYPE, Environment.DIRECTORY_PICTURES);
+
+        ContentValues values = new ContentValues();
+        values.put(EXTERNAL_PROJECT_ID, projectId);
+        values.put(EXTERNAL_TIME_RECORD_ID, timeRecordId);
+        values.put(EXTERNAL_NOTE_TYPE, noteType);
+        values.put(EXTERNAL_LINK, capturedFileUri.toString());
+        pushExternalNoteParams(values);
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, capturedFileUri);
+        startActivityForResult(intent, ADD_CAMERA_NOTE);
+    }
+
     private class OpenNoteViewTask extends AsyncTask<Bundle, Void, Bundle> {
         public static final String ARG_PROJECT_ID = "projectId";
         public static final String ARG_NOTE_TYPE = "noteType";
         private static final String ARG_TIME_RECORD_ID = "timeRecordId";
+
+        @Override
+        protected void onPostExecute(Bundle values) {
+            super.onPostExecute(values);
+            openNoteView(values.getString(ARG_PROJECT_ID), values.getString(ARG_TIME_RECORD_ID), values.getString(ARG_NOTE_TYPE));
+        }
 
         @Override
         protected Bundle doInBackground(Bundle... params) {
@@ -157,37 +265,12 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
             return values;
         }
 
-        @Override
-        protected void onPostExecute(Bundle values) {
-            super.onPostExecute(values);
-            // todo - move this out into a method of MainActivity
-            // todo - implement buttons other than text note
-            String projectId = values.getString(ARG_PROJECT_ID);
-            String timeRecordId =  values.getString(ARG_TIME_RECORD_ID);
-            String  noteType = values.getString(ARG_NOTE_TYPE);
-            if(mDualPane) {
-                TextNoteFragment noteFragment = TextNoteFragment.newInstance(projectId, timeRecordId, null);
-                getFragmentManager().beginTransaction()
-                        .replace(R.id.details_container, noteFragment)
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .commit();
-            } else {
-                Intent intent = new Intent();
-                intent.setClass(getApplicationContext(), NoteTakerActivity.class);
-                intent.putExtra(NoteTakerActivity.EXTRA_PROJECT_ID, projectId);
-                intent.putExtra(NoteTakerActivity.EXTRA_TIME_RECORD_ID, timeRecordId);
-                intent.putExtra(NoteTakerActivity.EXTRA_NOTE_TYPE, noteType);
-                startActivityForResult(intent, ADD_NEW_NOTE);
-            }
-
-        }
-
         private String getRunningTimeRecordFor(String projectId) {
             // todo - check to see if one is already running
             Cursor timeRecordIdsCursor = getContentResolver().query(TimeKeeperContract.TimeRecords.CONTENT_URI,
                     new String[] { TimeKeeperContract.TimeRecords._ID },
                     TimeKeeperContract.TimeRecords.whereProjectId(projectId) +
-                    " and " + TimeKeeperContract.TimeRecords.END_AT + " is NULL",
+                            " and " + TimeKeeperContract.TimeRecords.END_AT + " is NULL",
                     null, null);
             Set<String> timeRecordIds = DatabaseHelper.getIdsFromCursor(timeRecordIdsCursor, timeRecordIdsCursor.getColumnIndex(TimeKeeperContract.TimeRecords._ID));
             if(timeRecordIds.size() > 0) {

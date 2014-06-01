@@ -2,12 +2,15 @@ package com.easytimelog.timekeeper.views;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.CursorTreeAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.easytimelog.timekeeper.R;
@@ -15,6 +18,8 @@ import com.easytimelog.timekeeper.data.TimeKeeperContract;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+
+import java.io.File;
 
 public class TimeRecordCursorAdapter extends CursorTreeAdapter {
     private LayoutInflater mInflater;
@@ -75,7 +80,20 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
     protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
         String noteType = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.NOTE_TYPE));
         String scribble = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.SCRIBBLE));
-        TextView summary = (TextView)view.findViewById(R.id.noteSummary);
-        summary.setText("<" + noteType + ">" + scribble + "</" + noteType + ">");
+        String link     = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.LINK));
+
+        TextView summary = (TextView) view.findViewById(R.id.noteSummary);
+        ImageView imageSummary = (ImageView) view.findViewById(R.id.noteSummaryImage);
+
+        if(noteType.equals(TimeKeeperContract.Notes.CAMERA_NOTE)) {
+            summary.setVisibility(View.GONE);
+            imageSummary.setImageURI(Uri.parse(link));
+            imageSummary.setVisibility(View.VISIBLE);
+        }else {
+            imageSummary.setVisibility(View.GONE);
+            // todo - DevTool - remove noteType brackets
+            summary.setText("<" + noteType + ">" + scribble + "</" + noteType + ">");
+            summary.setVisibility(View.VISIBLE);
+        }
     }
 }

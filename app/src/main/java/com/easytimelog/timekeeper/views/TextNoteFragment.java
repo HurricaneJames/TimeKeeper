@@ -14,6 +14,7 @@ import android.widget.EditText;
 
 import com.easytimelog.timekeeper.R;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
+import com.easytimelog.timekeeper.util.DatabaseHelper;
 
 
 public class TextNoteFragment extends Fragment implements View.OnClickListener {
@@ -22,7 +23,6 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_NOTE_ID = "note_id";
     private static final String ARG_TIME_RECORD_ID = "time_record_id";
     private static final String ARG_PROJECT_ID = "project_id";
-    private static final String INVALID_NOTE_ID = null;
 
     private String mNoteId;
     private String mTimeRecordId;
@@ -99,21 +99,20 @@ public class TextNoteFragment extends Fragment implements View.OnClickListener {
             values.put(TimeKeeperContract.TimeRecords.PROJECT_ID, mProjectId);
             values.put(TimeKeeperContract.Notes.TIME_RECORD_ID, mTimeRecordId);
             if(saveNote) { values.putAll(saveNote()); }
-            if(mNoteId != INVALID_NOTE_ID) { values.put(TimeKeeperContract.TimeRecords._ID, mNoteId); }
+            if(mNoteId != null) { values.put(TimeKeeperContract.TimeRecords._ID, mNoteId); }
 
         mListener.onNoteChanged(saveNote ? OnNoteChangeListener.RESULT_ACCEPT : OnNoteChangeListener.RESULT_CANCEL, values);
     }
 
-    private ContentValues saveNote() { return saveNote(new ContentValues()); }
-    private ContentValues saveNote(ContentValues values) {
-        AsyncQueryHandler queryHandler = new AsyncQueryHandler(getActivity().getApplicationContext().getContentResolver()) {};
+    private ContentValues saveNote() {
+        ContentValues values = new ContentValues();
         values.put(TimeKeeperContract.Notes.TIME_RECORD_ID, mTimeRecordId);
         values.put(TimeKeeperContract.Notes.NOTE_TYPE, TimeKeeperContract.Notes.TEXT_NOTE);
         values.put(TimeKeeperContract.Notes.SCRIBBLE, mScribbleField.getText().toString());
-        if(mNoteId != INVALID_NOTE_ID) {
-            queryHandler.startUpdate(0, null, ContentUris.withAppendedId(TimeKeeperContract.Notes.CONTENT_URI, Long.parseLong(mNoteId)), values, null, null);
+        if(mNoteId != null) {
+            DatabaseHelper.updateNote(getActivity().getApplicationContext(), mNoteId, values);
         }else {
-            queryHandler.startInsert(0, null, TimeKeeperContract.Notes.CONTENT_URI, values);
+            DatabaseHelper.addNote(getActivity().getApplicationContext(), values);
         }
         return values;
     }

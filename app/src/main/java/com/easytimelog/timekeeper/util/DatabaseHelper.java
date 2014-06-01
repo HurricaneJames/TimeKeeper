@@ -1,5 +1,7 @@
 package com.easytimelog.timekeeper.util;
 
+import android.content.AsyncQueryHandler;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -33,4 +35,21 @@ public class DatabaseHelper {
         Uri insertUri = context.getContentResolver().insert(TimeKeeperContract.TimeRecords.CONTENT_URI, values);
         return insertUri.getLastPathSegment();
     }
+
+    public static void addNote(Context context, ContentValues noteValues) {
+        AsyncQueryHandler queryHandler = new AsyncQueryHandler(context.getApplicationContext().getContentResolver()) {};
+        queryHandler.startInsert(0, null, TimeKeeperContract.Notes.CONTENT_URI, noteValues);
+    }
+
+    public static void updateNote(Context context, String noteId, ContentValues noteValues) {
+        updateNote(context,
+                ContentUris.withAppendedId(TimeKeeperContract.Notes.CONTENT_URI, Long.parseLong(noteId)),
+                noteValues);
+    }
+
+    public static void updateNote(Context context, Uri noteUri, ContentValues noteValues) {
+        AsyncQueryHandler queryHandler = new AsyncQueryHandler(context.getApplicationContext().getContentResolver()) {};
+        queryHandler.startUpdate(0, null, noteUri, noteValues, null, null);
+    }
+
 }
