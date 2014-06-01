@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -19,6 +22,7 @@ import com.easytimelog.timekeeper.data.TimeKeeperContract;
 import com.easytimelog.timekeeper.devtools.DatabaseUtils;
 import com.easytimelog.timekeeper.util.DatabaseHelper;
 import com.easytimelog.timekeeper.util.FileHelper;
+import com.easytimelog.timekeeper.views.AudioCaptureFragment;
 import com.easytimelog.timekeeper.views.NoteTakerActivity;
 import com.easytimelog.timekeeper.views.OnNoteChangeListener;
 import com.easytimelog.timekeeper.views.OnNoteRequestedListener;
@@ -28,6 +32,7 @@ import com.easytimelog.timekeeper.views.ProjectsFragment;
 import com.easytimelog.timekeeper.views.TextNoteFragment;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends Activity implements ProjectDetailsFragment.OnTimeRecordSelectedListener,
@@ -117,6 +122,8 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         if(resultCode == RESULT_OK) {
             switch(requestCode) {
                 case ADD_TEXT_NOTE:
+                case ADD_AUDIO_NOTE:
+                    // NoteTakerActivity does all the work, just skip
                     // todo - update TextNoteFragment to return the content values instead of adding to the db there? (maybe not?)
                     // noteValues = (ContentValues)data.getParcelableExtra(NoteTakerActivity.NOTE_VALUES);
                     break;
@@ -177,13 +184,22 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
 
     @Override
     public void onNoteChanged(int result, ContentValues values) {
-        Log.d("MainActivity", "OnNoteChanged: " + result);
         // remove the fragment
-        Fragment projectDetailsFragment = ProjectDetailsFragment.newInstance(values.getAsString(TimeKeeperContract.TimeRecords.PROJECT_ID));
-        getFragmentManager().beginTransaction()
-                .replace(R.id.details_container, projectDetailsFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .commit();
+        String projectId = values.getAsString(TimeKeeperContract.TimeRecords.PROJECT_ID);
+        Log.d("MainActivity", "OnNoteChanged: " + projectId);
+        if(projectId != null) {
+            Fragment projectDetailsFragment = ProjectDetailsFragment.newInstance(values.getAsString(TimeKeeperContract.TimeRecords.PROJECT_ID));
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.details_container, projectDetailsFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .commit();
+        }else {
+            Fragment noteFragment = getFragmentManager().findFragmentById(R.id.details_container);
+            getFragmentManager().beginTransaction()
+                    .remove(noteFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .commit();
+        }
 
         // todo - if a time record was created specifically for this note, stop the clock
     }
@@ -204,6 +220,7 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         }else if(noteType.equals(TimeKeeperContract.Notes.CAMERA_NOTE)) {
             openCameraNoteView(projectId, timeRecordId, noteType);
         }else if(noteType.equals(TimeKeeperContract.Notes.AUDIO_NOTE)) {
+            openAudioNoteView(projectId, timeRecordId, noteType);
         }
     }
 
@@ -228,6 +245,14 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
             displayNoteFragment(TextNoteFragment.newInstance(projectId, timeRecordId, null));
         } else {
             startActivityForResult(getIntentFor(projectId, timeRecordId, noteType), ADD_TEXT_NOTE);
+        }
+    }
+
+    public void openAudioNoteView(String projectId, String timeRecordId, String noteType) {
+        if(mDualPane) {
+            displayNoteFragment(AudioCaptureFragment.newInstance(projectId, timeRecordId, FileHelper.getOutputFileUri(this, "TimeKeeper", FileHelper.AUDIO_TYPE)));
+        }else {
+            startActivityForResult(getIntentFor(projectId, timeRecordId, noteType), ADD_AUDIO_NOTE);
         }
     }
 

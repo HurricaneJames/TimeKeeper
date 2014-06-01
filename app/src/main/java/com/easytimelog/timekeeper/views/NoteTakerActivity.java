@@ -1,13 +1,18 @@
 package com.easytimelog.timekeeper.views;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.easytimelog.timekeeper.R;
+import com.easytimelog.timekeeper.data.TimeKeeperContract;
+import com.easytimelog.timekeeper.util.DatabaseHelper;
+import com.easytimelog.timekeeper.util.FileHelper;
 
 public class NoteTakerActivity extends Activity implements OnNoteChangeListener {
     public static final String EXTRA_PROJECT_ID = "project_id";
@@ -15,20 +20,33 @@ public class NoteTakerActivity extends Activity implements OnNoteChangeListener 
     public static final String EXTRA_NOTE_TYPE = "note_type";
     public static final String NOTE_VALUES = "note_values";
 
+    private String mProjectId;
+    private String mTimeRecordId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_taker);
         if(savedInstanceState == null) {
 
-            String projectId = getIntent().getStringExtra(EXTRA_PROJECT_ID);
-            String timeRecordId = getIntent().getStringExtra(EXTRA_TIME_RECORD_ID);
+            mProjectId = getIntent().getStringExtra(EXTRA_PROJECT_ID);
+            mTimeRecordId = getIntent().getStringExtra(EXTRA_TIME_RECORD_ID);
             String noteType = getIntent().getStringExtra(EXTRA_NOTE_TYPE);
 
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, TextNoteFragment.newInstance(projectId, timeRecordId, null))
+                    .add(R.id.container, getFragmentForNoteType(noteType))
                     .commit();
         }
+    }
+
+    private Fragment getFragmentForNoteType(String noteType) {
+        Fragment noteFragment = null;
+        if(TimeKeeperContract.Notes.TEXT_NOTE.equals(noteType)) {
+            noteFragment = TextNoteFragment.newInstance(mProjectId, mTimeRecordId, null);
+        }else if(TimeKeeperContract.Notes.AUDIO_NOTE.equals(noteType)) {
+            noteFragment = AudioCaptureFragment.newInstance(mProjectId, mTimeRecordId, FileHelper.getOutputFileUri(this, "TimeKeeper", FileHelper.AUDIO_TYPE));
+        }
+        return noteFragment;
     }
 
 
@@ -41,9 +59,6 @@ public class NoteTakerActivity extends Activity implements OnNoteChangeListener 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
@@ -59,9 +74,8 @@ public class NoteTakerActivity extends Activity implements OnNoteChangeListener 
     private void returnToCallingActivity(boolean approve, ContentValues values) {
         Intent intent = new Intent();
         intent.putExtra(NOTE_VALUES, values);
-        setResult(approve ? RESULT_ACCEPT : RESULT_CANCELED, intent);
+        setResult(approve ? Activity.RESULT_OK : Activity.RESULT_CANCELED, intent);
         finish();
-
     }
 
     @Override
@@ -71,4 +85,5 @@ public class NoteTakerActivity extends Activity implements OnNoteChangeListener 
         // trigger a cancel result
         returnToCallingActivity(false, new ContentValues());
     }
+
 }

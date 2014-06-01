@@ -89,6 +89,12 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
             summary.setVisibility(View.GONE);
             imageSummary.setImageURI(Uri.parse(link));
             imageSummary.setVisibility(View.VISIBLE);
+        }else if(TimeKeeperContract.Notes.AUDIO_NOTE.equals(noteType)) {
+            imageSummary.setVisibility(View.GONE);
+            // todo - DevTool - remove noteType brackets
+            summary.setText("<" + noteType + ">" + link + "</" + noteType + ">");
+            summary.setVisibility(View.VISIBLE);
+
         }else {
             imageSummary.setVisibility(View.GONE);
             // todo - DevTool - remove noteType brackets
