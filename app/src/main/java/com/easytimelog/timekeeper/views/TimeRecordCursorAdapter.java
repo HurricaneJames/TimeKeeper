@@ -2,15 +2,16 @@ package com.easytimelog.timekeeper.views;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.CursorTreeAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.easytimelog.timekeeper.R;
@@ -19,7 +20,7 @@ import com.easytimelog.timekeeper.data.TimeKeeperContract;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
-import java.io.File;
+import java.io.IOException;
 
 public class TimeRecordCursorAdapter extends CursorTreeAdapter {
     private LayoutInflater mInflater;
@@ -81,25 +82,94 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
         String noteType = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.NOTE_TYPE));
         String scribble = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.SCRIBBLE));
         String link     = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.LINK));
-
-        TextView summary = (TextView) view.findViewById(R.id.noteSummary);
-        ImageView imageSummary = (ImageView) view.findViewById(R.id.noteSummaryImage);
-
+        blankChildView(view);
         if(noteType.equals(TimeKeeperContract.Notes.CAMERA_NOTE)) {
-            summary.setVisibility(View.GONE);
+            ImageView imageSummary = (ImageView) view.findViewById(R.id.noteSummaryImage);
             imageSummary.setImageURI(Uri.parse(link));
             imageSummary.setVisibility(View.VISIBLE);
         }else if(TimeKeeperContract.Notes.AUDIO_NOTE.equals(noteType)) {
-            imageSummary.setVisibility(View.GONE);
-            // todo - DevTool - remove noteType brackets
-            summary.setText("<" + noteType + ">" + link + "</" + noteType + ">");
-            summary.setVisibility(View.VISIBLE);
-
+            View noteControls = view.findViewById(R.id.notePlaybackControls);
+            setupAudioPlayer(view, link);
         }else {
-            imageSummary.setVisibility(View.GONE);
             // todo - DevTool - remove noteType brackets
+            TextView summary = (TextView) view.findViewById(R.id.noteSummary);
             summary.setText("<" + noteType + ">" + scribble + "</" + noteType + ">");
             summary.setVisibility(View.VISIBLE);
+        }
+    }
+
+    protected void setupAudioPlayer(View audioPlayerView, String link) {
+        View audioControls = audioPlayerView.findViewById(R.id.notePlaybackControls);
+        ImageButton playButton  = (ImageButton) audioControls.findViewById(R.id.audio_player_play_pause_button);
+        SeekBar     progressBar = (SeekBar)     audioControls.findViewById(R.id.audio_player_progress_bar);
+        AudioPlayer player = (AudioPlayer) playButton.getTag(R.id.TAG_AUDIO_PLAYER);
+        if(player == null) {
+            playButton.setTag(R.id.TAG_AUDIO_PLAYER, new AudioPlayer(link, playButton, progressBar));
+        }else {
+            player.reset(link);
+        }
+        audioControls.setVisibility(View.VISIBLE);
+    }
+
+    protected void blankChildView(View view) {
+        view.findViewById(R.id.noteSummary).setVisibility(View.GONE);
+        view.findViewById(R.id.noteSummaryImage).setVisibility(View.GONE);
+        view.findViewById(R.id.notePlaybackControls).setVisibility(View.GONE);
+    }
+
+    private class AudioPlayer implements View.OnClickListener, MediaPlayer.OnCompletionListener {
+        private ImageButton mPlayButton;
+        private SeekBar mPlaybackBar;
+        private MediaPlayer mMediaPlayer;
+        private boolean mPlaying = false;
+
+        public AudioPlayer(String link, ImageButton playButton, SeekBar playbackBar) {
+            mMediaPlayer = new MediaPlayer();
+            mPlayButton = playButton;
+            mPlayButton.setOnClickListener(this);
+            mPlaybackBar = playbackBar;
+
+            setupPlayer(link);
+        }
+
+        // todo - implement
+        public AudioPlayer reset(String link) {
+            setupPlayer(link);
+            return this;
+        }
+
+        private void setupPlayer(String link) {
+            try {
+                mMediaPlayer.reset();
+                mMediaPlayer.setDataSource(link);
+                mMediaPlayer.setOnCompletionListener(this);
+                mMediaPlayer.prepare();
+            }catch(IllegalArgumentException e) { e.printStackTrace();
+            }catch(IllegalStateException e) { e.printStackTrace();
+            }catch(IOException e) { e.printStackTrace(); }
+
+            mPlaying = false;
+            mPlayButton.setImageResource(R.drawable.ic_action_play);
+            mPlaybackBar.setProgress(0);
+            mPlaybackBar.setMax(100);
+        }
+
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            mPlaybackBar.setProgress(0);
+            mMediaPlayer.seekTo(0);
+            mPlayButton.setImageResource(R.drawable.ic_action_play);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if(mMediaPlayer.isPlaying()) {
+                mMediaPlayer.pause();
+                mPlayButton.setImageResource(R.drawable.ic_action_play);
+            }else {
+                mMediaPlayer.start();
+                mPlayButton.setImageResource(R.drawable.ic_action_pause);
+            }
         }
     }
 }
