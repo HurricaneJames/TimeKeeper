@@ -15,6 +15,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.easytimelog.timekeeper.R;
+import com.easytimelog.timekeeper.controllers.AudioController;
 import com.easytimelog.timekeeper.data.TimeKeeperContract;
 
 import org.joda.time.DateTime;
@@ -88,8 +89,7 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
             imageSummary.setImageURI(Uri.parse(link));
             imageSummary.setVisibility(View.VISIBLE);
         }else if(TimeKeeperContract.Notes.AUDIO_NOTE.equals(noteType)) {
-            View noteControls = view.findViewById(R.id.notePlaybackControls);
-            setupAudioPlayer(view, link);
+            setupAudioPlayer(view.findViewById(R.id.notePlaybackControls), link);
         }else {
             // todo - DevTool - remove noteType brackets
             TextView summary = (TextView) view.findViewById(R.id.noteSummary);
@@ -98,16 +98,8 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
         }
     }
 
-    protected void setupAudioPlayer(View audioPlayerView, String link) {
-        View audioControls = audioPlayerView.findViewById(R.id.notePlaybackControls);
-        ImageButton playButton  = (ImageButton) audioControls.findViewById(R.id.audio_player_play_pause_button);
-        SeekBar     progressBar = (SeekBar)     audioControls.findViewById(R.id.audio_player_progress_bar);
-        AudioPlayer player = (AudioPlayer) playButton.getTag(R.id.TAG_AUDIO_PLAYER);
-        if(player == null) {
-            playButton.setTag(R.id.TAG_AUDIO_PLAYER, new AudioPlayer(link, playButton, progressBar));
-        }else {
-            player.reset(link);
-        }
+    protected void setupAudioPlayer(View audioControls, String link) {
+        new AudioControlViewHandler(audioControls, link);
         audioControls.setVisibility(View.VISIBLE);
     }
 
@@ -117,59 +109,48 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
         view.findViewById(R.id.notePlaybackControls).setVisibility(View.GONE);
     }
 
-    private class AudioPlayer implements View.OnClickListener, MediaPlayer.OnCompletionListener {
-        private ImageButton mPlayButton;
-        private SeekBar mPlaybackBar;
-        private MediaPlayer mMediaPlayer;
-        private boolean mPlaying = false;
+    private class AudioControlViewHandler implements View.OnClickListener, AudioController.UpdateListener {
+        private ImageButton     mPlayButton;
+        private SeekBar         mProgressBar;
+        private AudioController mController;
+        private String mLink;
 
-        public AudioPlayer(String link, ImageButton playButton, SeekBar playbackBar) {
-            mMediaPlayer = new MediaPlayer();
-            mPlayButton = playButton;
+        public AudioControlViewHandler(View audioControls, String link) {
+            mLink = link;
+            mPlayButton  = (ImageButton) audioControls.findViewById(R.id.audio_player_play_pause_button);
+            mProgressBar = (SeekBar)     audioControls.findViewById(R.id.audio_player_progress_bar);
+            mController  = AudioController.getController();
+
+            // todo - implement setImageResource based on return from mController.isPlaying(link)
+            mPlayButton.setImageResource(R.drawable.ic_action_play);
             mPlayButton.setOnClickListener(this);
-            mPlaybackBar = playbackBar;
 
-            setupPlayer(link);
-        }
-
-        // todo - implement
-        public AudioPlayer reset(String link) {
-            setupPlayer(link);
-            return this;
-        }
-
-        private void setupPlayer(String link) {
-            try {
-                mMediaPlayer.reset();
-                mMediaPlayer.setDataSource(link);
-                mMediaPlayer.setOnCompletionListener(this);
-                mMediaPlayer.prepare();
-            }catch(IllegalArgumentException e) { e.printStackTrace();
-            }catch(IllegalStateException e) { e.printStackTrace();
-            }catch(IOException e) { e.printStackTrace(); }
-
-            mPlaying = false;
-            mPlayButton.setImageResource(R.drawable.ic_action_play);
-            mPlaybackBar.setProgress(0);
-            mPlaybackBar.setMax(100);
-        }
-
-        @Override
-        public void onCompletion(MediaPlayer mp) {
-            mPlaybackBar.setProgress(0);
-            mMediaPlayer.seekTo(0);
-            mPlayButton.setImageResource(R.drawable.ic_action_play);
+            mProgressBar.setProgress(0);
+            mProgressBar.setMax(100);
+            // todo - implement setProgress from mController.getProgress
         }
 
         @Override
         public void onClick(View v) {
-            if(mMediaPlayer.isPlaying()) {
-                mMediaPlayer.pause();
+Log.d("TimeRecordCursorAdapter", "What on Earth is Calling onClick");
+            if(mController.isPlaying(mLink)) {
+                mController.pause(mLink);
                 mPlayButton.setImageResource(R.drawable.ic_action_play);
+                mController.removeUpdateListener(this);
             }else {
-                mMediaPlayer.start();
+                mController.play(mLink);
                 mPlayButton.setImageResource(R.drawable.ic_action_pause);
+                mController.addUpdateListener(this);
             }
         }
+
+        @Override
+        public void onProgress(int currentTime, int duration) {}
+
+        @Override
+        public void onChanged(String previouslyPlaying, String nowPlaying) {}
+
+        @Override
+        public void onComplete() {}
     }
 }

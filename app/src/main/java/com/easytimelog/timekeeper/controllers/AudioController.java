@@ -7,23 +7,34 @@ import java.io.IOException;
 import java.util.HashSet;
 
 public class AudioController implements MediaPlayer.OnCompletionListener {
+    private static AudioController _AudioController;
+    public static AudioController getController() {
+        return (_AudioController != null) ? _AudioController : (_AudioController = new AudioController());
+    }
+
+    private static final String AVAILABLE = "";
     private String mCurrentlyPlaying;
     private MediaPlayer mMediaPlayer;
     private HashSet<UpdateListener> mListeners;
     private ProgressUpdateTask mProgressUpdateTask = new ProgressUpdateTask();
 
     public AudioController() {
-        mCurrentlyPlaying = "";
+        mCurrentlyPlaying = AVAILABLE;
         mListeners = new HashSet<UpdateListener>();
         mMediaPlayer = new MediaPlayer();
     }
+
+    public boolean isPlaying(String file) {
+        return file != null && file.equals(mCurrentlyPlaying) && mMediaPlayer.isPlaying();
+    }
+
     public void play(String file) {
         if(file == null) { return; }
         if(file.equals(mCurrentlyPlaying)) {
             if(!mMediaPlayer.isPlaying()) { play(); }
         }else {
             String oldFile = mCurrentlyPlaying;
-            stop(mCurrentlyPlaying);
+            if(!AVAILABLE.equals(mCurrentlyPlaying)) { stop(mCurrentlyPlaying); }
             setupMediaPlayer(file);
             play();
             updateListeners(MEDIA_CHANGED, oldFile);
@@ -35,7 +46,7 @@ public class AudioController implements MediaPlayer.OnCompletionListener {
     }
 
     public void pause(String file) {
-        if(file != null && file.equals(mCurrentlyPlaying) && mMediaPlayer.isPlaying()) { pause(); }
+        if(isPlaying(file)) { pause(); }
     }
     private void pause() {
         mMediaPlayer.pause();
@@ -48,9 +59,9 @@ public class AudioController implements MediaPlayer.OnCompletionListener {
     private void stop() {
         mProgressUpdateTask.stop();
         mMediaPlayer.stop();
-        // prepare media player to replay the same file
-        try { mMediaPlayer.prepare();
-        }catch(IOException e) { e.printStackTrace(); }
+        // prepare media player to play another file
+        mCurrentlyPlaying = AVAILABLE;
+        mMediaPlayer.reset();
     }
 
     private void setupMediaPlayer(String file) {
@@ -91,12 +102,13 @@ public class AudioController implements MediaPlayer.OnCompletionListener {
                 break;
         }
     }
+
     public void addUpdateListener   (UpdateListener listener) { mListeners.add(listener); }
     public void removeUpdateListener(UpdateListener listener) { mListeners.remove(listener); }
-    public class UpdateListener {
-        public void onProgress(int currentTime, int duration) {}
-        public void onChanged(String previouslyPlaying, String nowPlaying) {}
-        public void onComplete() {}
+    public interface UpdateListener {
+        public void onProgress(int currentTime, int duration);
+        public void onChanged(String previouslyPlaying, String nowPlaying);
+        public void onComplete();
     }
 
     private class ProgressUpdateTask implements Runnable {
