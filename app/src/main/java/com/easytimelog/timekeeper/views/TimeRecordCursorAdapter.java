@@ -132,7 +132,6 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
 
         @Override
         public void onClick(View v) {
-Log.d("TimeRecordCursorAdapter", "What on Earth is Calling onClick");
             if(mController.isPlaying(mLink)) {
                 mController.pause(mLink);
                 mPlayButton.setImageResource(R.drawable.ic_action_play);
@@ -145,12 +144,17 @@ Log.d("TimeRecordCursorAdapter", "What on Earth is Calling onClick");
         }
 
         @Override
-        public void onProgress(int currentTime, int duration) {}
+        public void onProgress(int currentTime, int duration) {
+            Double percentComplete = ((((double)currentTime)/duration) * 100.0);
+            mProgressBar.setProgress(percentComplete.intValue());
+        }
 
         @Override
         public void onChanged(String previouslyPlaying, String nowPlaying) {}
 
         @Override
-        public void onComplete() {}
+        public void onComplete() {
+            mProgressBar.setProgress(0);
+        }
     }
 }

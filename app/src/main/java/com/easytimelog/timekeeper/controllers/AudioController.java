@@ -78,7 +78,7 @@ public class AudioController implements MediaPlayer.OnCompletionListener {
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-        mMediaPlayer.stop();
+        stop();
         updateListeners(MEDIA_COMPLETED);
     }
 
