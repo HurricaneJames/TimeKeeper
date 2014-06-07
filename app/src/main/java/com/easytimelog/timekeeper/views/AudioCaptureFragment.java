@@ -130,8 +130,8 @@ public class AudioCaptureFragment extends Fragment implements View.OnClickListen
         }
         mMediaRecorder = new MediaRecorder();
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
         if(mOutputUri.startsWith("file://")) { mOutputUri = mOutputUri.substring(7); }
         Log.d("AudioCaptureFragment - startRecording", "Set Output File: " + mOutputUri);
         mMediaRecorder.setOutputFile(Uri.parse(mOutputUri).toString());
@@ -145,6 +145,7 @@ public class AudioCaptureFragment extends Fragment implements View.OnClickListen
 
     private void stopRecording() {
         mMediaRecorder.stop();
+        mMediaRecorder.reset();
         mMediaRecorder.release();
         mMediaRecorder = null;
     }
