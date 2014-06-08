@@ -1,4 +1,6 @@
 # Project Status #
+Releasing Beta on Google Play store as soon as this checklist is complete.
+
 Main Project List
  - [x] Timer Button starts/stops timer
  - [x] Timer Button correctly reflects summation of time records (removing any overlapping times)
