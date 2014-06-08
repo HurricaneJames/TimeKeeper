@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.easytimelog.timekeeper.util.DatabaseHelper;
 
@@ -109,7 +110,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
                 break;
             case NOTE_COUNTS:
                 builder.setTables(TimeKeeperContract.Notes.TABLE_NAME);
-                String projectId = getProjectIdForTimeRecord(uri.getLastPathSegment());
+                String   projectId = uri.getLastPathSegment();
                 String[] countProjection = new String[] { TimeKeeperContract.Notes.NOTE_TYPE, "count(" + TimeKeeperContract.Notes.NOTE_TYPE + ") as " + TimeKeeperContract.Notes.NOTE_TYPE + "_count"};
                 String   countSelection = TimeKeeperContract.Notes.TIME_RECORD_ID + " in (select " + TimeKeeperContract.TimeRecords.TABLE_NAME + '.' + TimeKeeperContract.TimeRecords._ID + " from " + TimeKeeperContract.TimeRecords.TABLE_NAME + " where " + TimeKeeperContract.TimeRecords.TABLE_NAME + '.' + TimeKeeperContract.TimeRecords.PROJECT_ID + " = " + projectId + ")";
                 Cursor countCursor = builder.query(db, countProjection, countSelection, selectionArgs, TimeKeeperContract.Notes.NOTE_TYPE, null, null);
@@ -368,7 +369,7 @@ public class TimeKeeperContentProvider extends ContentProvider {
     private void updateProjectNoteCache(String projectId) {
         ContentResolver resolver = getContext().getContentResolver();
         long lProjectId = Long.parseLong(projectId);
-        Cursor countCursor = resolver.query( ContentUris.withAppendedId(Uri.withAppendedPath(TimeKeeperContract.Notes.CONTENT_URI, "counts"), lProjectId), null, null, null, null);
+        Cursor countCursor = resolver.query(ContentUris.withAppendedId(Uri.withAppendedPath(TimeKeeperContract.Notes.CONTENT_URI, "counts"), lProjectId), null, null, null, null);
         ContentValues values = new ContentValues();
             // BLANK CACHE
             values.put(TimeKeeperContract.Projects.TEXT_NOTE_COUNT, 0);
