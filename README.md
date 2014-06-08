@@ -1,3 +1,33 @@
+# Project Status #
+Main Project List
+ - [x] Timer Button starts/stops timer
+ - [x] Timer Button correctly reflects summation of time records (removing any overlapping times)
+ - [x] Note Counts
+ - [x] Note Buttons (call note capture views)
+ - [x] Selecting project opens project details view
+
+Project Details View
+ - [x] Display all time records
+ - [x] Each time record displays duration, start time, and number of notes
+ - [x] Tap on time record displays notes recorded during that session
+ - [ ] Display notes (see below)
+
+Note Capture
+ - [x] Text
+ - [ ] List
+ - [x] Camera (Image)
+ - [x] Audio
+
+Note View/Playback
+ - [x] Text
+ - [ ] List
+ - [x] Camera (Image)
+ - [x] Audio
+
+Bugs
+ - [ ] Correct project selection in dual-pane view. (Select first project, start timer for second project, second project becomes first project in list and takes selection, but details are not updated to reflect selected item)
+ - [ ] Orientation Change in dual-pane mode does not return the details to the correct state. (Closes all time records that were expanded, does not rebind the progress bars correctly on any playing audio)
+
 # Description #
 Back in 2011 I wanted to create an Android application to help me keep track of time spent on various projects. It should have basic stopwatch functionality tied to an optional "project" name. It should also support adding "Notes" to the time recordings. Notes are text blobs, lists, images/videos, and/or sound recordings. The general use case was to click start and then type or say what project was being done.
 
