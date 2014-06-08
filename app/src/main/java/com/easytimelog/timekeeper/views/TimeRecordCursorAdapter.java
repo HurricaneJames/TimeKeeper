@@ -121,13 +121,15 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
             mProgressBar = (SeekBar)     audioControls.findViewById(R.id.audio_player_progress_bar);
             mController  = AudioController.getController();
 
-            // todo - implement setImageResource based on return from mController.isPlaying(link)
-            mPlayButton.setImageResource(R.drawable.ic_action_play);
             mPlayButton.setOnClickListener(this);
+            if(mController.isPlaying(mLink)) {
+                mPlayButton.setImageResource(R.drawable.ic_action_pause);
+            }else {
+                mPlayButton.setImageResource(R.drawable.ic_action_play);
+            }
 
-            mProgressBar.setProgress(0);
             mProgressBar.setMax(100);
-            // todo - implement setProgress from mController.getProgress
+            mProgressBar.setProgress(new Double(mController.getMediaProgress(mLink)).intValue());
         }
 
         @Override
@@ -144,17 +146,26 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
         }
 
         @Override
-        public void onProgress(int currentTime, int duration) {
-            Double percentComplete = ((((double)currentTime)/duration) * 100.0);
-            mProgressBar.setProgress(percentComplete.intValue());
+        public void onProgress(String playing, double percentComplete) {
+            if(mLink.equals(playing)) {
+                mProgressBar.setProgress(new Double(percentComplete).intValue());
+            }
         }
 
         @Override
-        public void onChanged(String previouslyPlaying, String nowPlaying) {}
+        public void onChanged(String previouslyPlaying, String nowPlaying) {
+            resetView();
+        }
 
         @Override
         public void onComplete() {
+            resetView();
+        }
+
+        private void resetView() {
+            mController.removeUpdateListener(this);
             mProgressBar.setProgress(0);
+            mPlayButton.setImageResource(R.drawable.ic_action_play);
         }
     }
 }

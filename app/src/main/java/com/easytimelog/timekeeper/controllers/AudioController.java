@@ -28,6 +28,18 @@ public class AudioController implements MediaPlayer.OnCompletionListener {
         return file != null && file.equals(mCurrentlyPlaying) && mMediaPlayer.isPlaying();
     }
 
+    private double getPercentComplete() {
+        int current = mMediaPlayer.getCurrentPosition()
+          , duration = mMediaPlayer.getDuration();
+        return ((((double)current)/duration) * 100.0);
+    }
+
+    public double getMediaProgress(String file) {
+        double progress = 0.0;
+        if(mCurrentlyPlaying.equals(file)) { progress = getPercentComplete(); }
+        return progress;
+    }
+
     public void play(String file) {
         if(file == null) { return; }
         if(file.equals(mCurrentlyPlaying)) {
@@ -90,9 +102,7 @@ public class AudioController implements MediaPlayer.OnCompletionListener {
         // todo - implement
         switch(eventType) {
             case MEDIA_PROGRESS:
-                int current = mMediaPlayer.getCurrentPosition()
-                  , duration = mMediaPlayer.getDuration();
-                for(UpdateListener listener:mListeners) { listener.onProgress(current, duration); }
+                for(UpdateListener listener:mListeners) { listener.onProgress(mCurrentlyPlaying, getPercentComplete()); }
                 break;
             case MEDIA_CHANGED:
                 for(UpdateListener listener:mListeners) { listener.onChanged((String)data, mCurrentlyPlaying); }
@@ -106,7 +116,7 @@ public class AudioController implements MediaPlayer.OnCompletionListener {
     public void addUpdateListener   (UpdateListener listener) { mListeners.add(listener); }
     public void removeUpdateListener(UpdateListener listener) { mListeners.remove(listener); }
     public interface UpdateListener {
-        public void onProgress(int currentTime, int duration);
+        public void onProgress(String playing, double percentComplete);
         public void onChanged(String previouslyPlaying, String nowPlaying);
         public void onComplete();
     }
