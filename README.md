@@ -29,6 +29,8 @@ Note View/Playback
 Bugs
  - [ ] Correct project selection in dual-pane view. (Select first project, start timer for second project, second project becomes first project in list and takes selection, but details are not updated to reflect selected item)
  - [ ] Orientation Change in dual-pane mode does not return the details to the correct state. (Closes all time records that were expanded, does not rebind the progress bars correctly on any playing audio)
+ - [ ] Opening a new text note does not automatically open the keyboard.
+ - [ ] Saving/Canceling a new text note does not automatically hide the keyboard.
 
 # Description #
 Back in 2011 I wanted to create an Android application to help me keep track of time spent on various projects. It should have basic stopwatch functionality tied to an optional "project" name. It should also support adding "Notes" to the time recordings. Notes are text blobs, lists, images/videos, and/or sound recordings. The general use case was to click start and then type or say what project was being done.
