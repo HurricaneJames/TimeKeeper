@@ -18,8 +18,7 @@
         android:layout_weight="1"
         android:gravity="top|left"
         android:inputType="textMultiLine"
-        android:imeOptions="actionDone"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical" />
 
     <Button
         android:id="@+id/saveButton"

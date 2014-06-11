@@ -9,10 +9,13 @@ Main Project List
  - [x] Selecting project opens project details view
 
 Project Details View
+ - [ ] Display notes (see below)
  - [x] Display all time records
  - [x] Each time record displays duration, start time, and number of notes
  - [x] Tap on time record displays notes recorded during that session
- - [ ] Display notes (see below)
+ - [x] Tapping on project name allows user to change project name
+ - [x] Project name auto-saves while typing
+ - [ ] Project name has imeOption for done action so user can easily close the soft keyboard (if open)
 
 Note Capture
  - [x] Text
@@ -26,16 +29,14 @@ Note View/Playback
  - [x] Camera (Image)
  - [x] Audio
 
-Bugs
+Known Bugs
  - [ ] Correct project selection in dual-pane view. (Select first project, start timer for second project, second project becomes first project in list and takes selection, but details are not updated to reflect selected item)
  - [ ] Orientation Change in dual-pane mode does not return the details to the correct state. (Closes all time records that were expanded, does not rebind the progress bars correctly on any playing audio)
- - [ ] Opening a new text note does not automatically open the keyboard.
- - [ ] Saving/Canceling a new text note does not automatically hide the keyboard.
 
 # Description #
 Back in 2011 I wanted to create an Android application to help me keep track of time spent on various projects. It should have basic stopwatch functionality tied to an optional "project" name. It should also support adding "Notes" to the time recordings. Notes are text blobs, lists, images/videos, and/or sound recordings. The general use case was to click start and then type or say what project was being done.
 
-Shortly after starting the uphil trduge that is learning Android development, a new job happened. Then life got even more complicated. Ultimately TimeKeeper, and Android development in general, was put on the back burner.
+Shortly after starting the uphill trudge that is learning Android development, a new job happened. Then life got even more complicated. Ultimately TimeKeeper, and Android development in general, was put on the back burner.
 
 Luckly, my design was pretty good, because Google released Google Keep a year or so later. Google Keep was almost everything in the original design, minus the time tracking. It was "good enough" for most of what wanted.
 
