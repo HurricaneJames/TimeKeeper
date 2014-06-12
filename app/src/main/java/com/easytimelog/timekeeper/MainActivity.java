@@ -4,10 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -32,7 +29,6 @@ import com.easytimelog.timekeeper.views.ProjectsFragment;
 import com.easytimelog.timekeeper.views.TextNoteFragment;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends Activity implements ProjectDetailsFragment.OnTimeRecordSelectedListener,
@@ -53,13 +49,17 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     private static final String EXTERNAL_LINK = "link";
     private static final String EXTERNAL_SCRIBBLE = "scribble";
     private static final String EXTERNAL_NOTE_TYPE = "note_type";
-//    private Uri mCapturedFileUri;
+
+    private static final String SELECTED_PROJECT = "selected_project";
+    private static final String NO_PROJECT_SELECTED = "";
+    private String mSelectedProject = NO_PROJECT_SELECTED;
 
     private boolean mDualPane;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+Log.d("MainActivity", "onCreate Called ***** ***** *****");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -71,18 +71,20 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
                     .commit();
         }else {
             mExternalNoteActivityParams = savedInstanceState.getParcelable(EXTERNAL_PARAMS);
+            String selectedProject = savedInstanceState.getString(SELECTED_PROJECT);
+            if(selectedProject != null) { onProjectSelected(selectedProject); }
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if(mExternalNoteActivityParams != null) { outState.putParcelable(EXTERNAL_PARAMS, mExternalNoteActivityParams); }
+        if(!NO_PROJECT_SELECTED.equals(mSelectedProject)) { outState.putString(SELECTED_PROJECT, mSelectedProject); }
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -151,6 +153,7 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     @Override
     public void onProjectSelected(String id) {
         Log.d("MainActivity", "onProjectSelected [" + id + "]");
+        mSelectedProject = id;
         if(mDualPane) {
             Fragment detailsContainerFragment = getFragmentManager().findFragmentById(R.id.details_container);
             if(detailsContainerFragment == null || (detailsContainerFragment instanceof ProjectDetailsFragment && ((ProjectDetailsFragment)detailsContainerFragment).getShownProjectId() != id)) {
@@ -164,6 +167,7 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
             Intent intent = new Intent();
             intent.setClass(this, ProjectDetailActivity.class);
             intent.putExtra(ProjectDetailActivity.EXTRA_PROJECT_ID, id);
+            intent.putExtra(ProjectDetailActivity.EXTRA_DUAL_PANE, mDualPane);
             startActivity(intent);
         }
     }
