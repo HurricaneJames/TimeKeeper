@@ -59,7 +59,6 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-Log.d("MainActivity", "onCreate Called ***** ***** *****");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -139,12 +138,6 @@ Log.d("MainActivity", "onCreate Called ***** ***** *****");
         }
     }
 
-    public ContentValues getCameraNoteValues(Uri noteLinkUri) {
-        ContentValues values = new ContentValues();
-//        values.put(TimeKeeperContract.Notes.TIME_RECORD_ID, );
-        return null;
-    }
-
     @Override
     public void onTimeRecordSelected(String id) {
         Log.d("MainActivity", "onTimeRecordSelected [" + id + "]");
@@ -153,8 +146,9 @@ Log.d("MainActivity", "onCreate Called ***** ***** *****");
     @Override
     public void onProjectSelected(String id) {
         Log.d("MainActivity", "onProjectSelected [" + id + "]");
-        mSelectedProject = id;
         if(mDualPane) {
+            // only select a project if in dual pane (otherwise there is no point)
+            mSelectedProject = id;
             Fragment detailsContainerFragment = getFragmentManager().findFragmentById(R.id.details_container);
             if(detailsContainerFragment == null || (detailsContainerFragment instanceof ProjectDetailsFragment && ((ProjectDetailsFragment)detailsContainerFragment).getShownProjectId() != id)) {
                 detailsContainerFragment = ProjectDetailsFragment.newInstance(id);
