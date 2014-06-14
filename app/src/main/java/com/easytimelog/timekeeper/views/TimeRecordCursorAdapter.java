@@ -90,10 +90,9 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
             imageSummary.setVisibility(View.VISIBLE);
         }else if(TimeKeeperContract.Notes.AUDIO_NOTE.equals(noteType)) {
             setupAudioPlayer(view.findViewById(R.id.notePlaybackControls), link);
-        }else {
-            // todo - DevTool - remove noteType brackets
+        }else if(TimeKeeperContract.Notes.TEXT_NOTE.equals(noteType)) {
             TextView summary = (TextView) view.findViewById(R.id.noteSummary);
-            summary.setText("<" + noteType + ">" + scribble + "</" + noteType + ">");
+            summary.setText(scribble);
             summary.setVisibility(View.VISIBLE);
         }
     }
