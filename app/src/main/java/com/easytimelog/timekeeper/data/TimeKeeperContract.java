@@ -31,7 +31,8 @@ public final class TimeKeeperContract {
         public static final String AUDIO_NOTE_COUNT  = "audio_note_count";
 
         public static final String[] PROJECTION_ALL = { _ID, GLOBAL_ID, NAME, DURATION, RUNNING, RUNNING_TIME_RECORD, STARTED_AT, TEXT_NOTE_COUNT, LIST_NOTE_COUNT, CAMERA_NOTE_COUNT, AUDIO_NOTE_COUNT, CREATED_AT, UPDATED_AT };
-        public static final String DEFAULT_SORT_ORDER = UPDATED_AT + " DESC";
+//        public static final String DEFAULT_SORT_ORDER = UPDATED_AT + " DESC";
+        public static final String DEFAULT_SORT_ORDER = _ID + " DESC";
     }
     public static final class TimeRecords implements CommonColumns {
         public static final String TABLE_NAME = "time_records";
