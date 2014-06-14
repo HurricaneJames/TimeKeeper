@@ -3,6 +3,7 @@ package com.easytimelog.timekeeper.views;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
@@ -46,6 +47,7 @@ public class ProjectCursorAdapter extends CursorAdapter {
         String cameraCount = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.CAMERA_NOTE_COUNT));
         String audioCount  = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.AUDIO_NOTE_COUNT));
 
+        ImageButton cameraButton = ((ImageButton)view.findViewById(R.id.project_item_new_camera_note_button));
         NoteButtonHandler noteButtonHandler = new NoteButtonHandler(projectId);
         ((TextView)view.findViewById(R.id.project_item_text_count)).setText(textCount);
         ((TextView)view.findViewById(R.id.project_item_list_count)).setText(listCount);
@@ -53,8 +55,9 @@ public class ProjectCursorAdapter extends CursorAdapter {
         ((TextView)view.findViewById(R.id.project_item_audio_count)).setText(audioCount);
         ((ImageButton)view.findViewById(R.id.project_item_new_text_note_button)).setOnClickListener(noteButtonHandler);
         ((ImageButton)view.findViewById(R.id.project_item_new_list_note_button)).setOnClickListener(noteButtonHandler);
-        ((ImageButton)view.findViewById(R.id.project_item_new_camera_note_button)).setOnClickListener(noteButtonHandler);
         ((ImageButton)view.findViewById(R.id.project_item_new_audio_note_button)).setOnClickListener(noteButtonHandler);
+        cameraButton.setOnClickListener(noteButtonHandler);
+        if(!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) { cameraButton.setEnabled(false); }
 
         TextView nameButton = (TextView)view.findViewById(R.id.project_item_name);
         TimerButton timerButton = (TimerButton)view.findViewById(R.id.project_item_timer);
