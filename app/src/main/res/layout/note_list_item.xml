@@ -6,11 +6,13 @@
 
     <TextView
         android:id="@+id/noteSummary"
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <ImageView
         android:id="@+id/noteSummaryImage"
+        android:contentDescription="@string/note_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -29,6 +31,7 @@
 
         <ImageButton
             android:id="@+id/audio_player_play_pause_button"
+            android:contentDescription="@string/play_pause_button"
             android:src="@drawable/ic_action_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

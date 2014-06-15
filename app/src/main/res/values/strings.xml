@@ -23,5 +23,7 @@
     <string name="new_video_note">New Video Note</string>
     <string name="new_audio_note">New Audio Note</string>
     <string name="play_video">Play Video</string>
+    <string name="play_pause_button">Play/Pause Button</string>
+    <string name="note_image">Image Note</string>
 
 </resources>

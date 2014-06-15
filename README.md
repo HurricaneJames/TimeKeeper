@@ -36,6 +36,8 @@ Features/Enhancements
 
 Known Bugs
  - [ ] Correct project selection in dual-pane view. (Select first project, start timer for second project, second project becomes first project in list and takes selection, but details are not updated to reflect selected item)
+ - [ ] Clicking '+ New' changes the project list as expected. However, the selected item changes to a different project while the details are still set to the last selected item.
+ - [ ] Note Count in project details (time record parent view) does not update when new notes are added.
  - [ ] Video capture cuts off last 1/2 second (MPEG/AAC encoder error in Android)
  - [ ] DevTools still in options menu.
 
