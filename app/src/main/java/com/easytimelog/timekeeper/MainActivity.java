@@ -37,8 +37,8 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
                                                       OnNoteRequestedListener {
 
     public static final int ADD_TEXT_NOTE = 0;
-    public static final int ADD_LIST_NOTE = 1;
-    public static final int ADD_CAMERA_NOTE = 2;
+    public static final int ADD_VIDEO_NOTE = 1;
+    public static final int ADD_IMAGE_NOTE = 2;
     public static final int ADD_AUDIO_NOTE = 3;
 
     private ContentValues mExternalNoteActivityParams;
@@ -128,12 +128,14 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
                     // todo - update TextNoteFragment to return the content values instead of adding to the db there? (maybe not?)
                     // noteValues = (ContentValues)data.getParcelableExtra(NoteTakerActivity.NOTE_VALUES);
                     break;
-                case ADD_CAMERA_NOTE:
+                case ADD_IMAGE_NOTE:
+                case ADD_VIDEO_NOTE:
                     noteValues = new ContentValues();
                     noteValues.put(TimeKeeperContract.Notes.TIME_RECORD_ID, externalParams.getAsString(EXTERNAL_TIME_RECORD_ID));
                     noteValues.put(TimeKeeperContract.Notes.LINK, externalParams.getAsString(EXTERNAL_LINK));
                     noteValues.put(TimeKeeperContract.Notes.NOTE_TYPE, externalParams.getAsString(EXTERNAL_NOTE_TYPE));
                     DatabaseHelper.addNote(this, noteValues);
+                    break;
             }
         }
     }
@@ -214,9 +216,10 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     public void openNoteView(String projectId, String timeRecordId, String noteType) {
         if(noteType.equals(TimeKeeperContract.Notes.TEXT_NOTE)) {
             openTextNoteView(projectId, timeRecordId, noteType);
-        }else if(noteType.equals(TimeKeeperContract.Notes.LIST_NOTE)) {
-        }else if(noteType.equals(TimeKeeperContract.Notes.CAMERA_NOTE)) {
-            openCameraNoteView(projectId, timeRecordId, noteType);
+        }else if(noteType.equals(TimeKeeperContract.Notes.VIDEO_NOTE)) {
+            openVideoNoteView(projectId, timeRecordId, noteType);
+        }else if(noteType.equals(TimeKeeperContract.Notes.IMAGE_NOTE)) {
+            openImageNoteView(projectId, timeRecordId, noteType);
         }else if(noteType.equals(TimeKeeperContract.Notes.AUDIO_NOTE)) {
             openAudioNoteView(projectId, timeRecordId, noteType);
         }
@@ -254,20 +257,33 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         }
     }
 
-    public void openCameraNoteView(String projectId, String timeRecordId, String noteType) {
+    public void openImageNoteView(String projectId, String timeRecordId, String noteType) {
         // todo - add ability to save the images inside the app as a setting (default: stored in general photos directory for easy access)
-        Uri capturedFileUri = FileHelper.getOutputFileUri(this, "TimeKeeper", FileHelper.CAMERA_TYPE, Environment.DIRECTORY_PICTURES);
+        Uri capturedFileUri = FileHelper.getOutputFileUri(this, "TimeKeeper", FileHelper.IMAGE_TYPE, Environment.DIRECTORY_PICTURES);
+        pushExternalNoteParams(getContentValuesForMedia(capturedFileUri, projectId, timeRecordId, noteType));
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+               intent.putExtra(MediaStore.EXTRA_OUTPUT, capturedFileUri);
+        startActivityForResult(intent, ADD_IMAGE_NOTE);
+    }
 
+    public void openVideoNoteView(String projectId, String timeRecordId, String noteType) {
+        // todo - implement video playback
+        Uri capturedFileUri = FileHelper.getOutputFileUri(this, "TimeKeeper", FileHelper.VIDEO_TYPE, Environment.DIRECTORY_MOVIES);
+        pushExternalNoteParams(getContentValuesForMedia(capturedFileUri, projectId, timeRecordId, noteType));
+        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+               intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+               intent.putExtra(MediaStore.EXTRA_OUTPUT, capturedFileUri);
+
+        startActivityForResult(intent, ADD_VIDEO_NOTE);
+    }
+
+    private ContentValues getContentValuesForMedia(Uri fileUri, String projectId, String timeRecordId, String noteType) {
         ContentValues values = new ContentValues();
         values.put(EXTERNAL_PROJECT_ID, projectId);
         values.put(EXTERNAL_TIME_RECORD_ID, timeRecordId);
         values.put(EXTERNAL_NOTE_TYPE, noteType);
-        values.put(EXTERNAL_LINK, capturedFileUri.toString());
-        pushExternalNoteParams(values);
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, capturedFileUri);
-        startActivityForResult(intent, ADD_CAMERA_NOTE);
+        values.put(EXTERNAL_LINK, fileUri.toString());
+        return values;
     }
 
     private class OpenNoteViewTask extends AsyncTask<Bundle, Void, Bundle> {

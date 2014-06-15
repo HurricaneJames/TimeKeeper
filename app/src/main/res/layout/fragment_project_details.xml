@@ -16,12 +16,12 @@
         android:inputType="textCapWords"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:imeOptions="actionDone"
         android:nextFocusUp="@id/projectName"
         android:nextFocusLeft="@id/projectName" />
 
     <ExpandableListView
         android:id="@android:id/list"
-        android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/projectName" />

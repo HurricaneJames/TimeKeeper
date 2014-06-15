@@ -12,6 +12,16 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="loading_project">Loading Project...</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="default_timer_start">0s</string>
+    <string name="default_note_count">0</string>
+    <string name="icon_text_count">Text Note Count</string>
+    <string name="icon_image_count">Image Note Count</string>
+    <string name="icon_video_count">Video Note Count</string>
+    <string name="icon_audio_count">Audio Note Count</string>
+    <string name="new_text_note">New Text Note</string>
+    <string name="new_image_note">New Image Note</string>
+    <string name="new_video_note">New Video Note</string>
+    <string name="new_audio_note">New Audio Note</string>
+    <string name="play_video">Play Video</string>
 
 </resources>

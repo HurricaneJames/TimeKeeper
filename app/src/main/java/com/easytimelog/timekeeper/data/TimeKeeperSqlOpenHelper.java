@@ -18,7 +18,7 @@ public class TimeKeeperSqlOpenHelper extends SQLiteOpenHelper {
     private static final Migration[] MIGRATIONS = {
         new Migration() {
             private static final String TIME_CACHE_COLUMNS = "duration integer default 0, currently_running integer default 0, running_time_record_id integer, cached_start_at datetime";
-            private static final String NOTE_CACHE_COLUMNS = "text_note_count integer default 0, list_note_count integer default 0, camera_note_count integer default 0, audio_note_count integer default 0";
+            private static final String NOTE_CACHE_COLUMNS = "text_note_count integer default 0, image_note_count integer default 0, video_note_count integer default 0, audio_note_count integer default 0";
             public String[] up() {
                 return new String[]{
                     "create table projects (" +     COMMON_COLUMNS + "name text not null, " + TIME_CACHE_COLUMNS + ", " + NOTE_CACHE_COLUMNS + ");",

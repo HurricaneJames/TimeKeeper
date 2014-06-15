@@ -1,8 +1,8 @@
 package com.easytimelog.timekeeper.views;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,8 +20,6 @@ import com.easytimelog.timekeeper.data.TimeKeeperContract;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-
-import java.io.IOException;
 
 public class TimeRecordCursorAdapter extends CursorTreeAdapter {
     private LayoutInflater mInflater;
@@ -80,20 +78,32 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
-        String noteType = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.NOTE_TYPE));
-        String scribble = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.SCRIBBLE));
-        String link     = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.LINK));
+        final String noteType = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.NOTE_TYPE));
+        final String scribble = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.SCRIBBLE));
+        final String link     = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Notes.LINK));
         blankChildView(view);
-        if(noteType.equals(TimeKeeperContract.Notes.CAMERA_NOTE)) {
-            ImageView imageSummary = (ImageView) view.findViewById(R.id.noteSummaryImage);
-            imageSummary.setImageURI(Uri.parse(link));
-            imageSummary.setVisibility(View.VISIBLE);
-        }else if(TimeKeeperContract.Notes.AUDIO_NOTE.equals(noteType)) {
-            setupAudioPlayer(view.findViewById(R.id.notePlaybackControls), link);
-        }else if(TimeKeeperContract.Notes.TEXT_NOTE.equals(noteType)) {
+        if(TimeKeeperContract.Notes.TEXT_NOTE.equals(noteType)) {
             TextView summary = (TextView) view.findViewById(R.id.noteSummary);
             summary.setText(scribble);
             summary.setVisibility(View.VISIBLE);
+        }else if(TimeKeeperContract.Notes.AUDIO_NOTE.equals(noteType)) {
+            setupAudioPlayer(view.findViewById(R.id.notePlaybackControls), link);
+        }else if(TimeKeeperContract.Notes.IMAGE_NOTE.equals(noteType)) {
+            ImageView imageSummary = (ImageView) view.findViewById(R.id.noteSummaryImage);
+            imageSummary.setImageURI(Uri.parse(link));
+            imageSummary.setVisibility(View.VISIBLE);
+        }else if(TimeKeeperContract.Notes.VIDEO_NOTE.equals(noteType)) {
+            View videoButton = view.findViewById(R.id.noteVideoButton);
+            videoButton.setVisibility(View.VISIBLE);
+            videoButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setDataAndType(Uri.parse(link), "video/*");
+                    v.getContext().startActivity(intent);
+                }
+            });
         }
     }
 
@@ -105,6 +115,7 @@ public class TimeRecordCursorAdapter extends CursorTreeAdapter {
     protected void blankChildView(View view) {
         view.findViewById(R.id.noteSummary).setVisibility(View.GONE);
         view.findViewById(R.id.noteSummaryImage).setVisibility(View.GONE);
+        view.findViewById(R.id.noteVideoButton).setVisibility(View.GONE);
         view.findViewById(R.id.notePlaybackControls).setVisibility(View.GONE);
     }
 

@@ -6,11 +6,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -42,22 +40,26 @@ public class ProjectCursorAdapter extends CursorAdapter {
         long    duration  = cursor.getLong(cursor.getColumnIndex(TimeKeeperContract.Projects.DURATION));
         String  runningTimeRecordId = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.RUNNING_TIME_RECORD));
 
-        String textCount   = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.TEXT_NOTE_COUNT));
-        String listCount   = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.LIST_NOTE_COUNT));
-        String cameraCount = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.CAMERA_NOTE_COUNT));
-        String audioCount  = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.AUDIO_NOTE_COUNT));
+        String textCount  = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.TEXT_NOTE_COUNT));
+        String imageCount = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.IMAGE_NOTE_COUNT));
+        String videoCount = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.VIDEO_NOTE_COUNT));
+        String audioCount = cursor.getString(cursor.getColumnIndex(TimeKeeperContract.Projects.AUDIO_NOTE_COUNT));
 
-        ImageButton cameraButton = ((ImageButton)view.findViewById(R.id.project_item_new_camera_note_button));
+        ImageButton imageNoteButton = ((ImageButton)view.findViewById(R.id.project_item_new_image_note_button));
+        ImageButton videoNoteButton = ((ImageButton)view.findViewById(R.id.project_item_new_video_note_button));
         NoteButtonHandler noteButtonHandler = new NoteButtonHandler(projectId);
         ((TextView)view.findViewById(R.id.project_item_text_count)).setText(textCount);
-        ((TextView)view.findViewById(R.id.project_item_list_count)).setText(listCount);
-        ((TextView)view.findViewById(R.id.project_item_camera_count)).setText(cameraCount);
+        ((TextView)view.findViewById(R.id.project_item_video_count)).setText(videoCount);
+        ((TextView)view.findViewById(R.id.project_item_image_count)).setText(imageCount);
         ((TextView)view.findViewById(R.id.project_item_audio_count)).setText(audioCount);
         ((ImageButton)view.findViewById(R.id.project_item_new_text_note_button)).setOnClickListener(noteButtonHandler);
-        ((ImageButton)view.findViewById(R.id.project_item_new_list_note_button)).setOnClickListener(noteButtonHandler);
         ((ImageButton)view.findViewById(R.id.project_item_new_audio_note_button)).setOnClickListener(noteButtonHandler);
-        cameraButton.setOnClickListener(noteButtonHandler);
-        if(!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) { cameraButton.setEnabled(false); }
+        imageNoteButton.setOnClickListener(noteButtonHandler);
+        videoNoteButton.setOnClickListener(noteButtonHandler);
+        if(!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            imageNoteButton.setEnabled(false);
+            videoNoteButton.setEnabled(false);
+        }
 
         TextView nameButton = (TextView)view.findViewById(R.id.project_item_name);
         TimerButton timerButton = (TimerButton)view.findViewById(R.id.project_item_timer);
@@ -135,11 +137,11 @@ public class ProjectCursorAdapter extends CursorAdapter {
                 case R.id.project_item_new_text_note_button:
                     mNoteRequestListener.onNewNoteRequested(mProjectId, TimeKeeperContract.Notes.TEXT_NOTE);
                     break;
-                case R.id.project_item_new_list_note_button:
-                    mNoteRequestListener.onNewNoteRequested(mProjectId, TimeKeeperContract.Notes.LIST_NOTE);
+                case R.id.project_item_new_video_note_button:
+                    mNoteRequestListener.onNewNoteRequested(mProjectId, TimeKeeperContract.Notes.VIDEO_NOTE);
                     break;
-                case R.id.project_item_new_camera_note_button:
-                    mNoteRequestListener.onNewNoteRequested(mProjectId, TimeKeeperContract.Notes.CAMERA_NOTE);
+                case R.id.project_item_new_image_note_button:
+                    mNoteRequestListener.onNewNoteRequested(mProjectId, TimeKeeperContract.Notes.IMAGE_NOTE);
                     break;
                 case R.id.project_item_new_audio_note_button:
                     mNoteRequestListener.onNewNoteRequested(mProjectId, TimeKeeperContract.Notes.AUDIO_NOTE);

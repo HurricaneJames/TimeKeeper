@@ -12,7 +12,7 @@
         android:layout_height="120dp">
         <com.easytimelog.timekeeper.views.TimerButton
             android:id="@+id/project_item_timer"
-            android:text="0s"
+            android:text="@string/default_timer_start"
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:focusable="false"
@@ -26,6 +26,7 @@
 
         <ImageView
             android:id="@+id/project_item_text_count_icon"
+            android:contentDescription="@string/icon_text_count"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_action_keyboard"
@@ -33,32 +34,35 @@
             android:layout_toRightOf="@id/project_item_timer" />
 
         <ImageView
-            android:id="@+id/project_item_text_list_count_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_action_view_as_list"
-            android:layout_below="@id/project_item_name"
-            android:layout_toRightOf="@id/project_item_text_count_icon" />
-
-        <ImageView
-            android:id="@+id/project_item_text_camera_count_icon"
+            android:id="@+id/project_item_image_count_icon"
+            android:contentDescription="@string/icon_image_count"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_action_camera"
             android:layout_below="@id/project_item_name"
-            android:layout_toRightOf="@id/project_item_text_list_count_icon" />
+            android:layout_toRightOf="@id/project_item_text_count_icon" />
 
         <ImageView
-            android:id="@+id/project_item_text_audio_count_icon"
+            android:id="@+id/project_item_video_count_icon"
+            android:contentDescription="@string/icon_video_count"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_action_video"
+            android:layout_below="@id/project_item_name"
+            android:layout_toRightOf="@id/project_item_image_count_icon" />
+
+        <ImageView
+            android:id="@+id/project_item_audio_count_icon"
+            android:contentDescription="@string/icon_audio_count"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_action_mic"
             android:layout_below="@id/project_item_name"
-            android:layout_toRightOf="@id/project_item_text_camera_count_icon" />
+            android:layout_toRightOf="@id/project_item_video_count_icon" />
 
         <TextView
             android:id="@+id/project_item_text_count"
-            android:text="0"
+            android:text="@string/default_note_count"
             android:gravity="center"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -66,31 +70,31 @@
             android:layout_toRightOf="@id/project_item_timer" />
 
         <TextView
-            android:id="@+id/project_item_list_count"
-            android:text="0"
+            android:id="@+id/project_item_image_count"
+            android:text="@string/default_note_count"
             android:gravity="center"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_below="@id/project_item_text_list_count_icon"
+            android:layout_below="@id/project_item_image_count_icon"
             android:layout_toRightOf="@id/project_item_text_count" />
 
         <TextView
-            android:id="@+id/project_item_camera_count"
-            android:text="0"
+            android:id="@+id/project_item_video_count"
+            android:text="@string/default_note_count"
             android:gravity="center"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_below="@id/project_item_text_camera_count_icon"
-            android:layout_toRightOf="@id/project_item_list_count" />
+            android:layout_below="@id/project_item_video_count_icon"
+            android:layout_toRightOf="@id/project_item_image_count" />
 
         <TextView
             android:id="@+id/project_item_audio_count"
-            android:text="0"
+            android:text="@string/default_note_count"
             android:gravity="center"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_below="@id/project_item_text_audio_count_icon"
-            android:layout_toRightOf="@id/project_item_camera_count" />
+            android:layout_below="@id/project_item_audio_count_icon"
+            android:layout_toRightOf="@id/project_item_video_count" />
 
     </RelativeLayout>
 
@@ -103,27 +107,31 @@
 
         <ImageButton
             android:id="@+id/project_item_new_text_note_button"
+            android:contentDescription="@string/new_text_note"
             android:src="@drawable/ic_action_keyboard"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25" />
 
         <ImageButton
-            android:id="@+id/project_item_new_list_note_button"
-            android:src="@drawable/ic_action_view_as_list"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.25" />
-
-        <ImageButton
-            android:id="@+id/project_item_new_camera_note_button"
+            android:id="@+id/project_item_new_image_note_button"
+            android:contentDescription="@string/new_image_note"
             android:src="@drawable/ic_action_camera"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25" />
 
         <ImageButton
+            android:id="@+id/project_item_new_video_note_button"
+            android:contentDescription="@string/new_video_note"
+            android:src="@drawable/ic_action_video"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25" />
+
+        <ImageButton
             android:id="@+id/project_item_new_audio_note_button"
+            android:contentDescription="@string/new_audio_note"
             android:src="@drawable/ic_action_mic"
             android:layout_width="0dp"
             android:layout_height="match_parent"

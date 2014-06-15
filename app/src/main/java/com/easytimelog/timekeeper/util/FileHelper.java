@@ -7,15 +7,18 @@ import android.text.format.Time;
 import java.io.File;
 
 public class FileHelper {
-    public static final int CAMERA_TYPE = 0;
+    public static final int IMAGE_TYPE = 0;
     public static final int AUDIO_TYPE = 1;
+    public static final int VIDEO_TYPE = 2;
 
     public static String getFileExtension(int mediaType) {
         switch(mediaType) {
-            case CAMERA_TYPE:
+            case IMAGE_TYPE:
                 return ".jpg";
             case AUDIO_TYPE:
                 return ".m4a";
+            case VIDEO_TYPE:
+                return ".mp4";
             default:
                 return "";
         }

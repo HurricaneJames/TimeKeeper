@@ -14,7 +14,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.easytimelog.timekeeper.util.DatabaseHelper;
 
@@ -373,8 +372,8 @@ public class TimeKeeperContentProvider extends ContentProvider {
         ContentValues values = new ContentValues();
             // BLANK CACHE
             values.put(TimeKeeperContract.Projects.TEXT_NOTE_COUNT, 0);
-            values.put(TimeKeeperContract.Projects.LIST_NOTE_COUNT, 0);
-            values.put(TimeKeeperContract.Projects.CAMERA_NOTE_COUNT, 0);
+            values.put(TimeKeeperContract.Projects.VIDEO_NOTE_COUNT, 0);
+            values.put(TimeKeeperContract.Projects.IMAGE_NOTE_COUNT, 0);
             values.put(TimeKeeperContract.Projects.AUDIO_NOTE_COUNT, 0);
         if(countCursor.moveToFirst()) {
             int typeIndex = countCursor.getColumnIndex(TimeKeeperContract.Notes.NOTE_TYPE);

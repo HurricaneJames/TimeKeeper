@@ -9,28 +9,35 @@ Main Project List
  - [x] Selecting project opens project details view
 
 Project Details View
- - [ ] Display notes (see below)
+ - [x] Display notes (see below)
  - [x] Display all time records
  - [x] Each time record displays duration, start time, and number of notes
  - [x] Tap on time record displays notes recorded during that session
  - [x] Tapping on project name allows user to change project name
  - [x] Project name auto-saves while typing
- - [ ] Project name has imeOption for done action so user can easily close the soft keyboard (if open)
+ - [x] Project name has imeOption for done action so user can easily close the soft keyboard (if open)
 
 Note Capture
  - [x] Text
- - [ ] List
+ - [x] Camera (Video)
  - [x] Camera (Image)
  - [x] Audio
 
 Note View/Playback
  - [x] Text
- - [ ] List
+ - [x] Camera (Video)
  - [x] Camera (Image)
  - [x] Audio
 
+Features/Enhancements
+ - [ ] Replace image/video capture apps with custom implementation that works from a single button for both image/video (user choice when capturing)
+ - [ ] Add back lists (low priority as they did not work very well in the initial implementation)
+ - [ ] Add settings/preferences dialog
+
 Known Bugs
  - [ ] Correct project selection in dual-pane view. (Select first project, start timer for second project, second project becomes first project in list and takes selection, but details are not updated to reflect selected item)
+ - [ ] Video capture cuts off last 1/2 second (MPEG/AAC encoder error in Android)
+ - [ ] DevTools still in options menu.
 
 # Description #
 Back in 2011 I wanted to create an Android application to help me keep track of time spent on various projects. It should have basic stopwatch functionality tied to an optional "project" name. It should also support adding "Notes" to the time recordings. Notes are text blobs, lists, images/videos, and/or sound recordings. The general use case was to click start and then type or say what project was being done.
@@ -40,6 +47,9 @@ Shortly after starting the uphill trudge that is learning Android development, a
 Luckly, my design was pretty good, because Google released Google Keep a year or so later. Google Keep was almost everything in the original design, minus the time tracking. It was "good enough" for most of what wanted.
 
 Skip forward a couple years and there is some time and a desire to develop Android apps again. This is really a "MyFirstAndroid" type app, so it is probably best not to expect it to do anything useful for a while.
+
+## 2014-06-14 Update ##
+After implementing the list functionality, it because obvious that lists were one feature that worked much better on paper than in practice. Lists were replaced with a video button. Lists may come back at some point in the future (when replacing the stock video/image capture apps with custom implementations built for this project).
 
 # Compatibility #
 This app is designed to work with KitKat and newer (API 19+). At some point it may be extended to older devices, but for now, this is just easier.
