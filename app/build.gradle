@@ -10,10 +10,21 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    signingConfigs {
+        release {
+            storeFile file('../../AndroidKeys/TimeKeeperKeyStore.jks')
+            storePassword "insertStorePasswordHere"
+            keyAlias "EasyTimeLog TimeKeeper Certificate"
+            keyPassword "insertKeyPasswordHere"
+        }
+    }
+
     buildTypes {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
         }
     }
 }
