@@ -85,7 +85,7 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        // getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -97,17 +97,6 @@ public class MainActivity extends Activity implements ProjectDetailsFragment.OnT
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
-        }
-
-        if(id == R.id.action_seedDB) {
-            // TODO - remove this dev/debug with an actual UI method of adding records to the databse
-            DatabaseUtils.tempSeedDatabase(getApplicationContext(), 5, 25, 3);
-        }
-
-        if(id == R.id.action_wipeDB) {
-            // TODO - remove this dev/debug with an actual UI method of removing records from the db
-            DatabaseUtils.wipeDatabase(getApplicationContext());
-            System.exit(0);
         }
 
         return super.onOptionsItemSelected(item);

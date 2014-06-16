@@ -39,7 +39,6 @@ Known Bugs
  - [ ] Clicking '+ New' changes the project list as expected. However, the selected item changes to a different project while the details are still set to the last selected item.
  - [ ] Note Count in project details (time record parent view) does not update when new notes are added.
  - [ ] Video capture cuts off last 1/2 second (MPEG/AAC encoder error in Android)
- - [ ] DevTools still in options menu.
 
 # Description #
 Back in 2011 I wanted to create an Android application to help me keep track of time spent on various projects. It should have basic stopwatch functionality tied to an optional "project" name. It should also support adding "Notes" to the time recordings. Notes are text blobs, lists, images/videos, and/or sound recordings. The general use case was to click start and then type or say what project was being done.
@@ -51,7 +50,7 @@ Luckly, my design was pretty good, because Google released Google Keep a year or
 Skip forward a couple years and there is some time and a desire to develop Android apps again. This is really a "MyFirstAndroid" type app, so it is probably best not to expect it to do anything useful for a while.
 
 ## 2014-06-14 Update ##
-After implementing the list functionality, it because obvious that lists were one feature that worked much better on paper than in practice. Lists were replaced with a video button. Lists may come back at some point in the future (when replacing the stock video/image capture apps with custom implementations built for this project).
+After implementing the list functionality, it became obvious that lists were one feature that worked much better on paper than in practice. Lists were replaced with a video button. Lists may come back at some point in the future (when replacing the stock video/image capture apps with custom implementations built for this project).
 
 # Compatibility #
 This app is designed to work with KitKat and newer (API 19+). At some point it may be extended to older devices, but for now, this is just easier.
